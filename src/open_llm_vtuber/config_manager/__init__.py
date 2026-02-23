@@ -37,6 +37,7 @@ from .tts import (
     GPTSoVITSConfig,
     FishAPITTSConfig,
     SherpaOnnxTTSConfig,
+    Qwen3MLXTTSConfig,
 )
 from .vad import (
     VADConfig,
@@ -105,6 +106,7 @@ __all__ = [
     "GPTSoVITSConfig",
     "FishAPITTSConfig",
     "SherpaOnnxTTSConfig",
+    "Qwen3MLXTTSConfig",
     # VAD related classes
     "VADConfig",
     "SileroVADConfig",

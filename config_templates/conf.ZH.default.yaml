@@ -278,6 +278,7 @@ character_config:
     #   'cosyvoice_tts', 'melo_tts', 'coqui_tts', 'piper_tts',
     #   'fish_api_tts', 'x_tts', 'gpt_sovits_tts', 'sherpa_onnx_tts'
     #   'minimax_tts', 'elevenlabs_tts', 'cartesia_tts'
+    stream_by_sentence: false  # true = 按句切分，每句生成完即发送（降低首包延迟）
 
     siliconflow_tts:
       api_url: "https://api.siliconflow.cn/v1/audio/speech"
@@ -316,6 +317,16 @@ character_config:
       volume: 1.0               # 音量（0.0-1.0，1.0 为正常音量）
       normalize_audio: true     # 是否归一化音频（推荐启用，使音量更稳定）
       use_cuda: false           # 是否使用 GPU 加速（需要安装 onnxruntime-gpu）
+
+    # 仅 Apple Silicon：8-bit MLX Qwen3-TTS。将 tts_model 设为 qwen3_mlx_tts 以使用。
+    qwen3_mlx_tts:
+      model_id: 'mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-8bit'  # 或 1.7B 变体
+      # models_dir: ''           # 可选：项目 models/ 路径（如 qwen3-tts-apple-silicon/models）
+      speaker: 'Vivian'         # CustomVoice 说话人
+      language: 'Auto'
+      instruct: ''              # 情感/风格指令（如正常语气）
+      speed: 1.0
+      run_in_subprocess: true   # 在子进程中运行 TTS，避免原生崩溃导致服务退出（建议开启）
 
     cosyvoice_tts: # Cosy Voice TTS 连接到 gradio webui
       # 查看他们的文档以了解部署和以下配置的含义

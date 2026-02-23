@@ -8,7 +8,7 @@ dependencies = [
     "anthropic>=0.40.0",
     "azure-cognitiveservices-speech>=1.41.1",
     "chardet>=5.2.0",
-    "cartesia>=2.0.0", 
+    "cartesia>=2.0.0",
     "edge-tts>=7.0.0",
     "elevenlabs>=1.0.0",
     "fastapi[standard]>=0.115.8",
@@ -40,9 +40,18 @@ dependencies = [
     "websocket-client>=1.8.0",
     "letta-client>=0.1.100",
     "duckduckgo-mcp-server>=0.1.1",
+    "mlx-audio @ git+https://github.com/Blaizzy/mlx-audio.git@9349644ccbd62eb10900852228f7b952c566def3",
+    "mlx-lm>=0.22.0",
+    "sounddevice>=0.5.1",
 ]
 
 [project.optional-dependencies]
+# Apple Silicon only: Qwen3-TTS 8-bit via MLX (tts_model: qwen3_mlx_tts)
+mlx = [
+    "mlx-audio @ git+https://github.com/Blaizzy/mlx-audio.git@9349644ccbd62eb10900852228f7b952c566def3",
+    "mlx-lm>=0.22.0",
+    "sounddevice>=0.5.1",
+]
 bilibili = [
     "aiohttp>=3.10.0",
     "Brotli~=1.1.0",

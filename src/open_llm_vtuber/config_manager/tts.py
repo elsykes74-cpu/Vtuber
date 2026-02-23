@@ -585,6 +585,55 @@ class PiperTTSConfig(I18nMixin):
     }
 
 
+class Qwen3MLXTTSConfig(I18nMixin):
+    """Configuration for Qwen3-TTS MLX 8-bit (Apple Silicon only)."""
+
+    model_id: str = Field(
+        "mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-8bit",
+        alias="model_id",
+    )
+    models_dir: Optional[str] = Field(None, alias="models_dir")
+    speaker: str = Field("Vivian", alias="speaker")
+    language: str = Field("Auto", alias="language")
+    instruct: str = Field("", alias="instruct")
+    speed: float = Field(1.0, alias="speed")
+    run_in_subprocess: bool = Field(
+        True,
+        alias="run_in_subprocess",
+    )
+
+    DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
+        "model_id": Description(
+            en="MLX model id (e.g. mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-8bit) or local path.",
+            zh="MLX 模型 id 或本地路径（如 mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-8bit）。",
+        ),
+        "models_dir": Description(
+            en="Optional project models directory (e.g. path to qwen3-tts-apple-silicon/models).",
+            zh="可选的项目 models 目录路径。",
+        ),
+        "speaker": Description(
+            en="CustomVoice speaker (Vivian, Serena, Uncle_Fu, Dylan, Eric, Ryan, Aiden, Ono_Anna, Sohee).",
+            zh="CustomVoice 说话人。",
+        ),
+        "language": Description(
+            en="Kept for config compatibility; MLX CustomVoice uses speaker only.",
+            zh="保留以兼容配置；MLX CustomVoice 仅使用 speaker。",
+        ),
+        "instruct": Description(
+            en="Emotion/style instruction (e.g. Normal tone).",
+            zh="情感/风格指令（如正常语气）。",
+        ),
+        "speed": Description(
+            en="Speech speed (e.g. 1.0, 0.8, 1.3).",
+            zh="语速（如 1.0、0.8、1.3）。",
+        ),
+        "run_in_subprocess": Description(
+            en="Run each TTS in a separate process to avoid server exit on native crash (recommended True).",
+            zh="在独立子进程中运行每次 TTS，避免原生崩溃导致服务退出（建议 True）。",
+        ),
+    }
+
+
 class ElevenLabsTTSConfig(I18nMixin):
     """Configuration for ElevenLabs TTS."""
 
@@ -702,6 +751,7 @@ class TTSConfig(I18nMixin):
         "elevenlabs_tts",
         "cartesia_tts",
         "piper_tts",
+        "qwen3_mlx_tts",
     ] = Field(..., alias="tts_model")
 
     azure_tts: Optional[AzureTTSConfig] = Field(None, alias="azure_tts")
@@ -726,6 +776,12 @@ class TTSConfig(I18nMixin):
     elevenlabs_tts: ElevenLabsTTSConfig | None = Field(None, alias="elevenlabs_tts")
     cartesia_tts: CartesiaTTSConfig | None = Field(None, alias="cartesia_tts")
     piper_tts: Optional[PiperTTSConfig] = Field(None, alias="piper_tts")
+    qwen3_mlx_tts: Optional[Qwen3MLXTTSConfig] = Field(None, alias="qwen3_mlx_tts")
+
+    stream_by_sentence: bool = Field(
+        False,
+        alias="stream_by_sentence",
+    )
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "tts_model": Description(
@@ -769,6 +825,14 @@ class TTSConfig(I18nMixin):
             en="Configuration for Cartesia TTS", zh="Cartesia TTS 配置"
         ),
         "piper_tts": Description(en="Configuration for Piper TTS", zh="Piper TTS 配置"),
+        "qwen3_mlx_tts": Description(
+            en="Configuration for Qwen3-TTS MLX 8-bit (Apple Silicon)",
+            zh="Qwen3-TTS MLX 8-bit 配置（Apple Silicon）",
+        ),
+        "stream_by_sentence": Description(
+            en="When true, split TTS text by sentence and send each sentence's audio as soon as it is ready (pipeline streaming). Lowers time-to-first-audio.",
+            zh="为 true 时按句切分 TTS 文本，每句生成完立即发送（管道流式），可降低首包延迟。",
+        ),
     }
 
     @model_validator(mode="after")
@@ -813,4 +877,6 @@ class TTSConfig(I18nMixin):
 
         elif tts_model == "piper_tts" and values.piper_tts is not None:
             values.piper_tts.model_validate(values.piper_tts.model_dump())
+        elif tts_model == "qwen3_mlx_tts" and values.qwen3_mlx_tts is not None:
+            values.qwen3_mlx_tts.model_validate(values.qwen3_mlx_tts.model_dump())
         return values

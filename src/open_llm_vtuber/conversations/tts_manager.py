@@ -12,6 +12,17 @@ from ..tts.tts_interface import TTSInterface
 from ..utils.stream_audio import prepare_audio_payload
 from .types import WebSocketSend
 
+# Split on sentence-ending punctuation (keep delimiter with previous segment).
+_SENTENCE_END_RE = re.compile(r"(?<=[。！？.!?\n])\s*")
+
+
+def _split_sentences(text: str) -> List[str]:
+    """Split text into segments by sentence boundaries. Returns list of non-empty strings."""
+    if not text or not text.strip():
+        return []
+    segments = [s.strip() for s in _SENTENCE_END_RE.split(text) if s.strip()]
+    return segments if segments else [text.strip()]
+
 
 class TTSTaskManager:
     """Manages TTS tasks and ensures ordered delivery to frontend while allowing parallel TTS generation"""
@@ -35,6 +46,7 @@ class TTSTaskManager:
         live2d_model: Live2dModel,
         tts_engine: TTSInterface,
         websocket_send: WebSocketSend,
+        stream_by_sentence: bool = False,
     ) -> None:
         """
         Queue a TTS task while maintaining order of delivery.
@@ -46,6 +58,8 @@ class TTSTaskManager:
             live2d_model: Live2D model instance
             tts_engine: TTS engine instance
             websocket_send: WebSocket send function
+            stream_by_sentence: If True, split by sentence and send each sentence's
+                audio as soon as ready (pipeline streaming).
         """
         if len(re.sub(r'[\s.,!?，。！？\'"』」）】\s]+', "", tts_text)) == 0:
             logger.debug("Empty TTS text, sending silent display payload")
@@ -62,32 +76,50 @@ class TTSTaskManager:
             await self._send_silent_payload(display_text, actions, current_sequence)
             return
 
-        logger.debug(
-            f"🏃Queuing TTS task for: '''{tts_text}''' (by {display_text.name})"
-        )
-
-        # Get current sequence number
-        current_sequence = self._sequence_counter
-        self._sequence_counter += 1
-
-        # Start sender task if not running
         if not self._sender_task or self._sender_task.done():
             self._sender_task = asyncio.create_task(
                 self._process_payload_queue(websocket_send)
             )
 
-        # Create and queue the TTS task
-        task = asyncio.create_task(
-            self._process_tts(
-                tts_text=tts_text,
+        if stream_by_sentence:
+            segments = _split_sentences(tts_text)
+        else:
+            segments = [tts_text]
+
+        if len(segments) <= 1:
+            current_sequence = self._sequence_counter
+            self._sequence_counter += 1
+            logger.debug(
+                f"🏃Queuing TTS task for: '''{tts_text}''' (by {display_text.name})"
+            )
+            task = asyncio.create_task(
+                self._process_tts(
+                    tts_text=segments[0],
+                    display_text=display_text,
+                    actions=actions,
+                    live2d_model=live2d_model,
+                    tts_engine=tts_engine,
+                    sequence_number=current_sequence,
+                )
+            )
+            self.task_list.append(task)
+            return
+
+        # Pipeline streaming: generate and queue each sentence in order
+        logger.debug(
+            f"🏃Stream-by-sentence TTS for {len(segments)} segments (by {display_text.name})"
+        )
+        current_sequence = self._sequence_counter
+        self._sequence_counter += len(segments)
+        for i, segment in enumerate(segments):
+            await self._process_tts(
+                tts_text=segment,
                 display_text=display_text,
                 actions=actions,
                 live2d_model=live2d_model,
                 tts_engine=tts_engine,
-                sequence_number=current_sequence,
+                sequence_number=current_sequence + i,
             )
-        )
-        self.task_list.append(task)
 
     async def _process_payload_queue(self, websocket_send: WebSocketSend) -> None:
         """
