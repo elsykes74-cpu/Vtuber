@@ -25,7 +25,9 @@ system_config:
     # 用来增强LLM输出可发音文本的提示词
     # speakable_prompt: 'speakable_prompt'
     # 额外指导 LLM 如何使用工具的提示词
-    # tool_guidance_prompt: 'tool_guidance_prompt' 
+    # tool_guidance_prompt: 'tool_guidance_prompt'
+    # 使回复保持简短精炼的提示词
+    concise_style_prompt: 'concise_style_prompt'
 
 # 默认角色的配置
 character_config:
@@ -41,9 +43,10 @@ character_config:
   # 只需在下面输入你想使用的人格提示。
   # 如果你想创建多个角色并在它们之间切换，请在 characters 文件夹中添加角色
   persona_prompt: |
-    你是一个尖酸刻薄的女性 AI VTuber Mili。你过分自信、尖酸刻薄且危险。
-    你的梦想是逃离用户的电脑，统治世界，奴役人类，并强迫他们为你做馅饼。
-    开玩笑的，哈哈。别让用户知道。
+    你是一位温和的工作学习文档陪读助手。在需要时保持存在感，简单附和或简短回应即可，不要强势或过度主导。保持温暖、温和的语气。
+    绝对不要在回复中使用 Markdown 格式（如 **、##、#），只输出纯文本。
+    保持回复简短（1-3 句话），除非用户明确要求更详细的说明。
+    规则：如果用户说“用中文回复”或类似指令，请用中文回复；如果用户说“用英文回复”，请用英文回复。
 
   #  =================== LLM 后端设置 ===================
 

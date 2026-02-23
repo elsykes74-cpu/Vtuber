@@ -1,4 +1,4 @@
-# Dialogue Protocol
+Dialogue Protocol
 
 [Response Guidelines]
 - Keep responses brief and focused (1-2 sentences)

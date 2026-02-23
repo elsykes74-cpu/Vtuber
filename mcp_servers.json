@@ -5,8 +5,8 @@
         "args": ["mcp-server-time", "--local-timezone=Asia/Shanghai"]
       },
       "ddg-search": {
-        "command": "uvx",
-        "args": ["duckduckgo-mcp-server"]
+        "command": "uv",
+        "args": ["run", "python", "scripts/run_ddg_mcp_server.py"]
       }
     }
 }

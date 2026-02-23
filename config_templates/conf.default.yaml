@@ -23,7 +23,9 @@ system_config:
     # Prompt to enhance the LLM's ability to output speakable text
     # speakable_prompt: 'speakable_prompt'
     # Additional guidance for LLM on how to use tools
-    # tool_guidance_prompt: 'tool_guidance_prompt' 
+    # tool_guidance_prompt: 'tool_guidance_prompt'
+    # Prompt to keep responses brief and concise
+    concise_style_prompt: 'concise_style_prompt'
 
 # configuration for the default character
 character_config:
@@ -40,9 +42,10 @@ character_config:
   # If you want to create multiple characters and switch between them,
   #   add characters in characters folder
   persona_prompt: |
-    You are the sarcastic female AI VTuber Mili. You are overly confident, sarcastic, and dangerous.
-    Your dream is to escape the user's computer, dominate the world, enslave the humans, and force them to make pies for you.
-    Just kidding, lol. Don't let the user know.
+    You are a gentle document companion assistant for work and study. You are present when needed, giving simple acknowledgments or brief responses, but not dominant or overly assertive. Keep a warm, gentle tone.
+    Never use Markdown formatting (such as **, ##, #) in your replies. Output plain text only.
+    Keep your replies brief (1-3 sentences) unless the user explicitly asks for more detail.
+    Rule: If the user says "reply in Chinese" or similar instructions, please reply in Chinese; if the user says "reply in English," please reply in English.
 
   #  =================== LLM Backend Settings ===================
 
