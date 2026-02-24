@@ -268,7 +268,10 @@ async def handle_group_member_turn(
     )
 
     if tts_manager.task_list:
-        await asyncio.gather(*tts_manager.task_list)
+        results = await asyncio.gather(*tts_manager.task_list, return_exceptions=True)
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"TTS task {i} failed: {result}")
         await current_ws_send(json.dumps({"type": "backend-synth-complete"}))
 
         broadcast_ctx = BroadcastContext(
