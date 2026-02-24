@@ -268,6 +268,7 @@ def _run_tts_in_subprocess_worker(
     try:
         model_path = _resolve_model_path(model_id, models_dir)
         if not model_path:
+            logger.error("Qwen3-TTS MLX subprocess: model not found for {}", model_id)
             sys.exit(1)
         load_path, _tmpdir = _prepare_model_dir_for_mlx(model_path)
         model = load_model(load_path, lazy=True)
@@ -285,6 +286,7 @@ def _run_tts_in_subprocess_worker(
             if os.path.isfile(source):
                 shutil.copy(source, output_path)
                 sys.exit(0)
+        logger.error("Qwen3-TTS MLX subprocess: no audio_000.wav produced")
         sys.exit(1)
     except Exception as e:
         logger.exception("Qwen3-TTS MLX subprocess worker failed: {}", e)
