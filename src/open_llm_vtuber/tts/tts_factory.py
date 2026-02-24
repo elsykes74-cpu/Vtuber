@@ -211,6 +211,21 @@ class TTSFactory:
                 normalize_audio=kwargs.get("normalize_audio"),
                 use_cuda=kwargs.get("use_cuda"),
             )
+        elif engine_type == "qwen3_mlx_tts":
+            from .qwen3_mlx_tts_adapter import TTSEngine as Qwen3MLXTTSEngine
+
+            return Qwen3MLXTTSEngine(
+                model_id=kwargs.get(
+                    "model_id",
+                    "mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-8bit",
+                ),
+                models_dir=kwargs.get("models_dir"),
+                speaker=kwargs.get("speaker", "Vivian"),
+                language=kwargs.get("language", "Auto"),
+                instruct=kwargs.get("instruct", ""),
+                speed=kwargs.get("speed", 1.0),
+                run_in_subprocess=kwargs.get("run_in_subprocess", True),
+            )
         else:
             raise ValueError(f"Unknown TTS engine type: {engine_type}")
 

@@ -43,6 +43,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Apple Silicon only: Qwen3-TTS 8-bit via MLX (tts_model: qwen3_mlx_tts)
+mlx = [
+    "mlx-audio @ git+https://github.com/Blaizzy/mlx-audio.git@9349644ccbd62eb10900852228f7b952c566def3",
+    "mlx-lm>=0.22.0",
+    "sounddevice>=0.5.1",
+]
 bilibili = [
     "aiohttp>=3.10.0",
     "Brotli~=1.1.0",
