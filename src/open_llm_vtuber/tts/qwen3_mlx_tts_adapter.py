@@ -235,7 +235,7 @@ def _resolve_model_path(
             return full_path
 
     logger.debug(
-        "Qwen3-TTS MLX: model not found; model_id=%s, hub_candidates=%s, folder_candidates=%s",
+        "Qwen3-TTS MLX: model not found; model_id={}, hub_candidates={}, folder_candidates={}",
         model_id,
         hub_candidates,
         folder_candidates,
@@ -287,7 +287,7 @@ def _run_tts_in_subprocess_worker(
                 sys.exit(0)
         sys.exit(1)
     except Exception as e:
-        logger.exception("Qwen3-TTS MLX subprocess worker failed: %s", e)
+        logger.exception("Qwen3-TTS MLX subprocess worker failed: {}", e)
         sys.exit(1)
 
 
@@ -373,10 +373,18 @@ class TTSEngine(TTSInterface):
         path = self.generate_cache_file_name(file_name_no_ext, file_extension="wav")
 
         if self._run_in_subprocess:
-            return self._generate_audio_subprocess(path, text)
+            try:
+                return self._generate_audio_subprocess(path, text)
+            except (KeyboardInterrupt, SystemExit):
+                raise
+            except Exception as e:
+                logger.opt(exception=True).critical(
+                    "Qwen3-TTS MLX (subprocess) unable to generate audio: {}", e
+                )
+                return None
 
         try:
-            logger.debug("Qwen3-TTS MLX: generating (len=%d) ...", len(text))
+            logger.debug("Qwen3-TTS MLX: generating (len={}) ...", len(text))
             with tempfile.TemporaryDirectory(prefix="qwen3_mlx_tts_") as temp_dir:
                 generate_audio(
                     model=self._model,
@@ -397,10 +405,8 @@ class TTSEngine(TTSInterface):
         except (KeyboardInterrupt, SystemExit):
             raise
         except Exception as e:
-            logger.critical(
-                "Qwen3-TTS MLX unable to generate audio: {}",
-                e,
-                exc_info=True,
+            logger.opt(exception=True).critical(
+                "Qwen3-TTS MLX unable to generate audio: {}", e
             )
             return None
 
