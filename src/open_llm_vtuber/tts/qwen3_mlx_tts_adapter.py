@@ -445,25 +445,21 @@ class TTSEngine(TTSInterface):
             )
             proc.start()
             proc.join(timeout=120)
-            if os.path.isfile(out_path) and os.path.getsize(out_path) > 0:
+            alive = proc.is_alive()
+            if alive:
+                proc.terminate()
+                proc.join(timeout=5)
+
+            if proc.exitcode == 0 and os.path.isfile(out_path) and os.path.getsize(out_path) > 0:
                 shutil.copy(out_path, path)
                 logger.debug("Qwen3-TTS MLX (subprocess): wrote {}", path)
-                if proc.exitcode != 0:
-                    logger.debug(
-                        "Qwen3-TTS MLX subprocess wrote audio but exited with code {}",
-                        proc.exitcode,
-                    )
-                if proc.is_alive():
-                    proc.terminate()
-                    proc.join(timeout=5)
                 return path
-            if proc.exitcode != 0:
+            if alive:
+                logger.warning("Qwen3-TTS MLX subprocess timed out after 120s")
+            elif proc.exitcode != 0:
                 logger.warning(
                     "Qwen3-TTS MLX subprocess exited with code {}", proc.exitcode
                 )
-            if proc.is_alive():
-                proc.terminate()
-                proc.join(timeout=5)
             return None
         finally:
             if os.path.isfile(out_path):
