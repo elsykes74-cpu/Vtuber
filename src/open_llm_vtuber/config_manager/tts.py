@@ -604,8 +604,12 @@ class Qwen3MLXTTSConfig(I18nMixin):
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "model_id": Description(
-            en="MLX model id (e.g. mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-8bit) or local path.",
-            zh="MLX 模型 id 或本地路径（如 mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-8bit）。",
+            en="MLX model id: 0.6B (faster, default) or 1.7B (better quality). "
+            "e.g. mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-8bit, "
+            "mlx-community/Qwen3-TTS-12Hz-1.7B-CustomVoice-8bit. Or local path.",
+            zh="MLX 模型 id：0.6B（更快，默认）或 1.7B（音质更好）。"
+            "如 mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-8bit、"
+            "mlx-community/Qwen3-TTS-12Hz-1.7B-CustomVoice-8bit。或本地路径。",
         ),
         "models_dir": Description(
             en="Optional project models directory (e.g. path to qwen3-tts-apple-silicon/models).",
@@ -620,16 +624,16 @@ class Qwen3MLXTTSConfig(I18nMixin):
             zh="保留以兼容配置；MLX CustomVoice 仅使用 speaker。",
         ),
         "instruct": Description(
-            en="Emotion/style instruction (e.g. Normal tone).",
-            zh="情感/风格指令（如正常语气）。",
+            en="Natural-language emotion/style (e.g. Normal tone, happy, speak with excitement).",
+            zh="自然语言描述情感/风格（如正常语气、开心一点、略带惊讶）。",
         ),
         "speed": Description(
             en="Speech speed (e.g. 1.0, 0.8, 1.3).",
-            zh="语速（如 1.0、0.8、1.3）。",
+            zh="语速。",
         ),
         "run_in_subprocess": Description(
             en="Run each TTS in a separate process to avoid server exit on native crash (recommended True).",
-            zh="在独立子进程中运行每次 TTS，避免原生崩溃导致服务退出（建议 True）。",
+            zh="在独立子进程中运行 TTS，避免原生崩溃导致服务退出（建议 True）。",
         ),
     }
 
@@ -778,11 +782,6 @@ class TTSConfig(I18nMixin):
     piper_tts: Optional[PiperTTSConfig] = Field(None, alias="piper_tts")
     qwen3_mlx_tts: Optional[Qwen3MLXTTSConfig] = Field(None, alias="qwen3_mlx_tts")
 
-    stream_by_sentence: bool = Field(
-        False,
-        alias="stream_by_sentence",
-    )
-
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "tts_model": Description(
             en="Text-to-speech model to use", zh="要使用的文本转语音模型"
@@ -828,10 +827,6 @@ class TTSConfig(I18nMixin):
         "qwen3_mlx_tts": Description(
             en="Configuration for Qwen3-TTS MLX 8-bit (Apple Silicon)",
             zh="Qwen3-TTS MLX 8-bit 配置（Apple Silicon）",
-        ),
-        "stream_by_sentence": Description(
-            en="When true, split TTS text by sentence and send each sentence's audio as soon as it is ready (pipeline streaming). Lowers time-to-first-audio.",
-            zh="为 true 时按句切分 TTS 文本，每句生成完立即发送（管道流式），可降低首包延迟。",
         ),
     }
 

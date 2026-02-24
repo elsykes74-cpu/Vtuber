@@ -195,8 +195,10 @@ class TTSTaskManager:
                 tts_engine.remove_file(audio_file_path)
                 logger.debug("Audio cache file cleaned.")
 
-    async def _generate_audio(self, tts_engine: TTSInterface, text: str) -> str:
-        """Generate audio file from text"""
+    async def _generate_audio(
+        self, tts_engine: TTSInterface, text: str
+    ) -> str | None:
+        """Generate audio file from text. Returns path or None on failure."""
         logger.debug(f"🏃Generating audio for '''{text}'''...")
         return await tts_engine.async_generate_audio(
             text=text,

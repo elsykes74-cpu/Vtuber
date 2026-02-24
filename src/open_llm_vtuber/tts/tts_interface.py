@@ -6,7 +6,9 @@ from loguru import logger
 
 
 class TTSInterface(metaclass=abc.ABCMeta):
-    async def async_generate_audio(self, text: str, file_name_no_ext=None) -> str:
+    async def async_generate_audio(
+        self, text: str, file_name_no_ext=None
+    ) -> str | None:
         """
         Asynchronously generate speech audio file using TTS.
 
@@ -19,23 +21,23 @@ class TTSInterface(metaclass=abc.ABCMeta):
             name of the file without file extension
 
         Returns:
-        str: the path to the generated audio file
-
+            Path to the generated audio file, or None on failure.
         """
         return await asyncio.to_thread(self.generate_audio, text, file_name_no_ext)
 
     @abc.abstractmethod
-    def generate_audio(self, text: str, file_name_no_ext=None) -> str:
+    def generate_audio(
+        self, text: str, file_name_no_ext=None
+    ) -> str | None:
         """
         Generate speech audio file using TTS.
-        text: str
-            the text to speak
-        file_name_no_ext (optional and deprecated): str
-            name of the file without file extension
+
+        Args:
+            text: The text to speak.
+            file_name_no_ext: Optional base name for the output file (deprecated).
 
         Returns:
-        str: the path to the generated audio file
-
+            Path to the generated audio file, or None on failure.
         """
         raise NotImplementedError
 
