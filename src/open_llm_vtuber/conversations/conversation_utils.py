@@ -167,7 +167,14 @@ async def finalize_conversation_turn(
 ) -> None:
     """Finalize a conversation turn"""
     if tts_manager.task_list:
-        await asyncio.gather(*tts_manager.task_list)
+        results = await asyncio.gather(*tts_manager.task_list, return_exceptions=True)
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"TTS task {i} failed: {result}")
+
+        if tts_manager._sender_task and not tts_manager._sender_task.done():
+            await tts_manager._sender_task
+
         await websocket_send(json.dumps({"type": "backend-synth-complete"}))
 
         response = await message_handler.wait_for_response(
