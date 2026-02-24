@@ -37,7 +37,7 @@ except ImportError as e:
 # Default: 0.6B CustomVoice 8-bit (fast on Mac).
 DEFAULT_MODEL_ID = "mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-8bit"
 
-# Top-level keys required by mlx_audio ModelConfig.from_dict.
+# Top-level keys required by mlx_audio ModelConfig.from_dict when merging talker config.
 _LLM_CONFIG_KEYS = (
     "hidden_size",
     "num_hidden_layers",
@@ -209,10 +209,22 @@ def _resolve_model_path(
     for hub in hub_candidates:
         if not os.path.isdir(hub):
             continue
-        for cache_folder in folder_candidates:
+        for idx, cache_folder in enumerate(folder_candidates):
             full_path = os.path.join(hub, cache_folder)
             if not os.path.isdir(full_path):
                 continue
+            # Warn when 0.6B was requested but only 1.7B fallback was found.
+            if (
+                want_8bit
+                and "0.6B" in folder_name
+                and len(folder_candidates) >= 2
+                and idx == 1
+            ):
+                logger.warning(
+                    "Qwen3-TTS MLX: 0.6B model not found; using 1.7B fallback "
+                    "(higher VRAM, slower). Consider downloading the 0.6B model "
+                    "or set model_id to the 1.7B variant explicitly."
+                )
             snapshots_dir = os.path.join(full_path, "snapshots")
             if os.path.exists(snapshots_dir):
                 subfolders = [
@@ -243,6 +255,15 @@ def _run_tts_in_subprocess_worker(
     """Run TTS in a subprocess; writes WAV to output_path. Exits 0 on success, 1 on failure.
 
     Used when run_in_subprocess=True to isolate native crashes (e.g. MLX/Metal).
+
+    Args:
+        model_id: Model ID or path for resolution.
+        models_dir: Optional project models directory.
+        speaker: CustomVoice speaker name.
+        instruct: Natural-language emotion/style instruction.
+        speed: Speech speed.
+        text: Text to synthesize.
+        output_path: Path to write the WAV file.
     """
     try:
         model_path = _resolve_model_path(model_id, models_dir)
@@ -265,7 +286,8 @@ def _run_tts_in_subprocess_worker(
                 shutil.copy(source, output_path)
                 sys.exit(0)
         sys.exit(1)
-    except Exception:
+    except Exception as e:
+        logger.exception("Qwen3-TTS MLX subprocess worker failed: %s", e)
         sys.exit(1)
 
 
@@ -383,13 +405,25 @@ class TTSEngine(TTSInterface):
             return None
 
     def _generate_audio_subprocess(self, path: str, text: str) -> Optional[str]:
-        """Run TTS in a subprocess and write result to path. Returns path or None."""
+        """Run TTS in a subprocess and write result to path.
+
+        Uses spawn start method for MLX/Metal safety across platforms (avoids
+        fork-related issues when GPU context is initialized).
+
+        Args:
+            path: Destination path for the WAV file.
+            text: Text to synthesize.
+
+        Returns:
+            path on success, None on failure.
+        """
         with tempfile.NamedTemporaryFile(
             suffix=".wav", prefix="qwen3_mlx_tts_", delete=False
         ) as f:
             out_path = f.name
         try:
-            proc = multiprocessing.Process(
+            ctx = multiprocessing.get_context("spawn")
+            proc = ctx.Process(
                 target=_run_tts_in_subprocess_worker,
                 args=(
                     self.model_id,
@@ -411,6 +445,9 @@ class TTSEngine(TTSInterface):
                         "Qwen3-TTS MLX subprocess wrote audio but exited with code {}",
                         proc.exitcode,
                     )
+                if proc.is_alive():
+                    proc.terminate()
+                    proc.join(timeout=5)
                 return path
             if proc.exitcode != 0:
                 logger.warning(
