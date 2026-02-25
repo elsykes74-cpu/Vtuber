@@ -35,6 +35,7 @@ class BasicMemoryAgent(AgentInterface):
     """Agent with basic chat memory and tool calling support."""
 
     _system: str = "You are a helpful assistant."
+    _INTERRUPTED_SIGNAL: str = "[Interrupted by user]"
 
     def __init__(
         self,
@@ -122,7 +123,10 @@ class BasicMemoryAgent(AgentInterface):
         logger.debug(f"Memory Agent: Setting system prompt: '''{system}'''")
 
         if self.interrupt_method == "user":
-            system = f"{system}\n\nIf you received `[interrupted by user]` signal, you were interrupted."
+            system = (
+                f"{system}\n\nIf you received `{self._INTERRUPTED_SIGNAL}` signal, "
+                "you were interrupted."
+            )
 
         system = (
             f"{system}\n\n"
@@ -210,6 +214,8 @@ class BasicMemoryAgent(AgentInterface):
         self._interrupt_handled = True
 
         heard = (heard_response or "").strip()
+        if heard and not is_substantive_response(heard):
+            heard = ""
         if self._memory and self._memory[-1]["role"] == "assistant":
             self._memory[-1]["content"] = (
                 heard if heard else self._memory[-1]["content"]
@@ -227,7 +233,7 @@ class BasicMemoryAgent(AgentInterface):
         self._memory.append(
             {
                 "role": interrupt_role,
-                "content": "[Interrupted by user]",
+                "content": self._INTERRUPTED_SIGNAL,
             }
         )
         logger.info(f"Handled interrupt with role '{interrupt_role}'.")

@@ -117,7 +117,7 @@ async def handle_sentence_output(
         logger.debug(f"🏃 Processing output: '''{tts_text}'''...")
 
         if translate_engine:
-            if len(re.sub(r'[\s.,!?，。！？\'"』」）】\s]+', "", tts_text)):
+            if is_substantive_response(tts_text):
                 tts_text = translate_engine.translate(tts_text)
             logger.info(f"🏃 Text after translation: '''{tts_text}'''...")
         else:
