@@ -15,6 +15,27 @@ from ..live2d_model import Live2dModel
 from ..tts.tts_interface import TTSInterface
 from ..utils.stream_audio import prepare_audio_payload
 
+# Regex used to detect "substantive" text (same as tts_manager empty check).
+# If after removing these chars the string is empty, we treat as non-substantive.
+_SUBSTANTIVE_STRIP_RE = re.compile(r"[\s.,!?，。！？\'\"』」）】\s]+")
+
+
+def is_substantive_response(text: str) -> bool:
+    """Return True if text has substantive content (not only punctuation/whitespace/ellipsis).
+
+    Used to avoid storing or treating ellipsis-only model replies as real responses,
+    and to align with tts_manager's empty-TTS-text behavior.
+
+    Args:
+        text: The response text to check.
+
+    Returns:
+        True if there is at least one character left after removing punctuation/whitespace.
+    """
+    if not text or not text.strip():
+        return False
+    return len(_SUBSTANTIVE_STRIP_RE.sub("", text)) > 0
+
 
 # Convert class methods to standalone functions
 def create_batch_input(

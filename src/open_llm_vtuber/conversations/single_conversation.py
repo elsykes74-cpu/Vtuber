@@ -12,6 +12,7 @@ from .conversation_utils import (
     finalize_conversation_turn,
     cleanup_conversation,
     EMOJI_LIST,
+    is_substantive_response,
 )
 from .types import WebSocketSend
 from .tts_manager import TTSTaskManager
@@ -148,7 +149,11 @@ async def process_single_conversation(
             client_uid=client_uid,
         )
 
-        if context.history_uid and full_response:  # Check full_response before storing
+        if (
+            context.history_uid
+            and full_response
+            and is_substantive_response(full_response)
+        ):
             store_message(
                 conf_uid=context.character_config.conf_uid,
                 history_uid=context.history_uid,
@@ -158,6 +163,11 @@ async def process_single_conversation(
                 avatar=context.character_config.avatar,
             )
             logger.info(f"AI response: {full_response}")
+        elif full_response:
+            logger.debug(
+                "Skipping store and AI response log (non-substantive): %s",
+                full_response,
+            )
 
         return full_response  # Return accumulated full_response
 
