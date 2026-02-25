@@ -216,18 +216,8 @@ class BasicMemoryAgent(AgentInterface):
         heard = (heard_response or "").strip()
         if heard and not is_substantive_response(heard):
             heard = ""
-        if self._memory and self._memory[-1]["role"] == "assistant":
-            self._memory[-1]["content"] = (
-                heard if heard else self._memory[-1]["content"]
-            )
-        else:
-            if heard:
-                self._memory.append(
-                    {
-                        "role": "assistant",
-                        "content": heard,
-                    }
-                )
+        if heard:
+            self._add_message(heard, "assistant")
 
         interrupt_role = "system" if self.interrupt_method == "system" else "user"
         self._memory.append(
