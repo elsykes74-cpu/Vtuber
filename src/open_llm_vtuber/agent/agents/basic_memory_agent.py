@@ -28,6 +28,7 @@ from ...mcpp.tool_manager import ToolManager
 from ...mcpp.json_detector import StreamJSONDetector
 from ...mcpp.types import ToolCallObject
 from ...mcpp.tool_executor import ToolExecutor
+from ...conversations.conversation_utils import is_substantive_response
 
 
 class BasicMemoryAgent(AgentInterface):
@@ -123,6 +124,11 @@ class BasicMemoryAgent(AgentInterface):
         if self.interrupt_method == "user":
             system = f"{system}\n\nIf you received `[interrupted by user]` signal, you were interrupted."
 
+        system = (
+            f"{system}\n\n"
+            "Do not respond with only ellipsis (...) or punctuation. "
+            "For brief acknowledgments use a short spoken phrase (e.g. 好的, 嗯, Okay)."
+        )
         self._system = system
 
     def _add_message(
@@ -193,23 +199,27 @@ class BasicMemoryAgent(AgentInterface):
         logger.info(f"Loaded {len(self._memory)} messages from history.")
 
     def handle_interrupt(self, heard_response: str) -> None:
-        """Handle user interruption."""
+        """Handle user interruption.
+
+        Updates memory with the partial assistant response (if any) without appending
+        "...", to avoid polluting context and priming the model to output ellipsis.
+        """
         if self._interrupt_handled:
             return
 
         self._interrupt_handled = True
 
+        heard = (heard_response or "").strip()
         if self._memory and self._memory[-1]["role"] == "assistant":
-            if not self._memory[-1]["content"].endswith("..."):
-                self._memory[-1]["content"] = heard_response + "..."
-            else:
-                self._memory[-1]["content"] = heard_response + "..."
+            self._memory[-1]["content"] = (
+                heard if heard else self._memory[-1]["content"]
+            )
         else:
-            if heard_response:
+            if heard:
                 self._memory.append(
                     {
                         "role": "assistant",
-                        "content": heard_response + "...",
+                        "content": heard,
                     }
                 )
 
@@ -656,7 +666,7 @@ class BasicMemoryAgent(AgentInterface):
                     if text_chunk:
                         yield text_chunk
                         complete_response += text_chunk
-                if complete_response:
+                if complete_response and is_substantive_response(complete_response):
                     self._add_message(complete_response, "assistant")
 
         return chat_with_memory
