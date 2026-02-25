@@ -127,7 +127,7 @@ class BasicMemoryAgent(AgentInterface):
         system = (
             f"{system}\n\n"
             "Do not respond with only ellipsis (...) or punctuation. "
-            "For brief acknowledgments use a short spoken phrase (e.g. 好的, 嗯, Okay)."
+            "For brief acknowledgments use a short spoken phrase appropriate to the conversation language."
         )
         self._system = system
 
@@ -372,7 +372,9 @@ class BasicMemoryAgent(AgentInterface):
                             if c["type"] == "text"
                         ]
                     ).strip()
-                    if assistant_text_for_memory:
+                    if assistant_text_for_memory and is_substantive_response(
+                        assistant_text_for_memory
+                    ):
                         self._add_message(assistant_text_for_memory, "assistant")
 
                 tool_results_for_llm = []
@@ -406,7 +408,7 @@ class BasicMemoryAgent(AgentInterface):
                 # stop_reason = None
                 continue
             else:
-                if current_turn_text:
+                if current_turn_text and is_substantive_response(current_turn_text):
                     self._add_message(current_turn_text, "assistant")
                 return
 
@@ -507,7 +509,8 @@ class BasicMemoryAgent(AgentInterface):
 
             if detected_prompt_json:
                 logger.info("Processing tools detected via prompt mode JSON.")
-                self._add_message(current_turn_text, "assistant")
+                if current_turn_text and is_substantive_response(current_turn_text):
+                    self._add_message(current_turn_text, "assistant")
 
                 parsed_tools = self._tool_executor.process_tool_from_prompt_json(
                     detected_prompt_json
@@ -551,7 +554,7 @@ class BasicMemoryAgent(AgentInterface):
 
             elif pending_tool_calls and assistant_message_for_api:
                 messages.append(assistant_message_for_api)
-                if current_turn_text:
+                if current_turn_text and is_substantive_response(current_turn_text):
                     self._add_message(current_turn_text, "assistant")
 
                 tool_results_for_llm = []
@@ -584,7 +587,7 @@ class BasicMemoryAgent(AgentInterface):
                 continue
 
             else:
-                if current_turn_text:
+                if current_turn_text and is_substantive_response(current_turn_text):
                     self._add_message(current_turn_text, "assistant")
                 return
 

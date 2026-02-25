@@ -17,7 +17,8 @@ from ..utils.stream_audio import prepare_audio_payload
 
 # Regex used to detect "substantive" text (same as tts_manager empty check).
 # If after removing these chars the string is empty, we treat as non-substantive.
-_SUBSTANTIVE_STRIP_RE = re.compile(r"[\s.,!?，。！？\'\"』」）】\s]+")
+# Includes ASCII "..." and Unicode ellipsis U+2026.
+_SUBSTANTIVE_STRIP_RE = re.compile(r"[\s.,!?，。！？\'\"』」）】\u2026]+")
 
 
 def is_substantive_response(text: str) -> bool:
