@@ -1,5 +1,24 @@
 [
     {
+        "name": "my_vrm_avatar",
+        "type": "vrm",
+        "description": "Example VRM 3D avatar - replace with your actual .vrm filename",
+        "url": "/vrm-models/my_avatar.vrm",
+        "kScale": 1.0,
+        "initialXshift": 0,
+        "initialYshift": -0.5,
+        "idleMotionGroupName": null,
+        "emotionMap": {
+            "neutral": "neutral",
+            "joy": "happy",
+            "anger": "angry",
+            "sadness": "sad",
+            "surprise": "surprised",
+            "fear": "sad",
+            "disgust": "angry"
+        }
+    },
+    {
         "name": "mao_pro",
         "description": "",
         "url": "/live2d-models/mao_pro/runtime/mao_pro.model3.json",

@@ -29,7 +29,10 @@ system_config:
 character_config:
   conf_name: 'mao_pro' # The name of character configuration file.
   conf_uid: 'mao_pro_001' # The unique identifier of character configuration.
-  live2d_model_name: 'mao_pro' # The name of Live2D model. Must be the same as the corresponding name in model_dict.json
+  live2d_model_name: 'mao_pro' # The name of the avatar model. Must match the "name" field in model_dict.json.
+  # For Live2D models: set to the model name (e.g. 'mao_pro', 'shizuku') and use the browser at http://[host]:[port]/
+  # For VRM 3D models: set to a VRM model name with "type": "vrm" in model_dict.json, place the .vrm file in vrm-models/,
+  #   and use the VRM viewer at http://[host]:[port]/vrm
   character_name: 'Mao' # Will be used in the group conversation and the display name of the AI.
   avatar: 'mao.png' # Suggest using a square image for the avatar. Save it in the avatars folder. Leave blank to use the first letter of the character name as the avatar.
   human_name: 'Human' # Will be used in the group conversation and the display name of the human.

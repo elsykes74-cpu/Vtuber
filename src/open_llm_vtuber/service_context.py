@@ -6,6 +6,7 @@ from fastapi import WebSocket
 
 from prompts import prompt_loader
 from .live2d_model import Live2dModel
+from .vrm_model import VrmModel
 from .asr.asr_interface import ASRInterface
 from .tts.tts_interface import TTSInterface
 from .vad.vad_interface import VADInterface
@@ -312,13 +313,31 @@ class ServiceContext:
         self.character_config = config.character_config
 
     def init_live2d(self, live2d_model_name: str) -> None:
-        logger.info(f"Initializing Live2D: {live2d_model_name}")
+        logger.info(f"Initializing avatar model: {live2d_model_name}")
         try:
-            self.live2d_model = Live2dModel(live2d_model_name)
+            # Peek at model_dict.json to determine avatar type before instantiating
+            import json as _json
+
+            try:
+                with open("model_dict.json", "r", encoding="utf-8") as _f:
+                    _model_dict = _json.load(_f)
+                _matched = next(
+                    (m for m in _model_dict if m["name"] == live2d_model_name), None
+                )
+                _avatar_type = _matched.get("type", "live2d") if _matched else "live2d"
+            except Exception:
+                _avatar_type = "live2d"
+
+            if _avatar_type == "vrm":
+                logger.info(f"Detected VRM model: {live2d_model_name}")
+                self.live2d_model = VrmModel(live2d_model_name)
+            else:
+                self.live2d_model = Live2dModel(live2d_model_name)
+
             self.character_config.live2d_model_name = live2d_model_name
         except Exception as e:
-            logger.critical(f"Error initializing Live2D: {e}")
-            logger.critical("Try to proceed without Live2D...")
+            logger.critical(f"Error initializing avatar model: {e}")
+            logger.critical("Try to proceed without avatar model...")
 
     def init_asr(self, asr_config: ASRConfig) -> None:
         if not self.asr_engine or (self.character_config.asr_config != asr_config):

@@ -123,6 +123,15 @@ class WebSocketServer:
             CORSStaticFiles(directory="live2d-models"),
             name="live2d-models",
         )
+
+        # Mount VRM models directory (only if it exists)
+        if os.path.exists("vrm-models"):
+            self.app.mount(
+                "/vrm-models",
+                CORSStaticFiles(directory="vrm-models"),
+                name="vrm-models",
+            )
+
         self.app.mount(
             "/bg",
             CORSStaticFiles(directory="backgrounds"),
@@ -140,6 +149,14 @@ class WebSocketServer:
             CORSStaticFiles(directory="web_tool", html=True),
             name="web_tool",
         )
+
+        # Mount VRM viewer page before the main frontend catch-all (only if it exists)
+        if os.path.exists("vrm-viewer"):
+            self.app.mount(
+                "/vrm",
+                CORSStaticFiles(directory="vrm-viewer", html=True),
+                name="vrm-viewer",
+            )
 
         # Mount main frontend last (as catch-all)
         self.app.mount(

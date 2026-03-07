@@ -31,7 +31,10 @@ system_config:
 character_config:
   conf_name: 'mao_pro' # 角色配置文件的名称
   conf_uid: 'mao_pro_001' # 角色配置的唯一标识符
-  live2d_model_name: 'mao_pro' # Live2D 模型名称
+  live2d_model_name: 'mao_pro' # 头像模型名称，必须与 model_dict.json 中的 "name" 字段一致。
+  # Live2D 模型：在浏览器访问 http://[host]:[port]/
+  # VRM 3D 模型：在 model_dict.json 中设置 "type": "vrm"，将 .vrm 文件放入 vrm-models/ 目录，
+  #   并通过 http://[host]:[port]/vrm 访问 VRM 查看器
   character_name: 'Mao' # 将在群聊中使用，并显示为 AI 的名称。
   avatar: 'mao.png' # 建议使用正方形图像作为头像。将其保存到 avatars 文件夹中。留空则使用角色名称的首字母作为头像。
   human_name: 'Human' # 将在群聊中使用，并显示为人类的名称。
