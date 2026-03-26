@@ -1,12 +1,38 @@
+import asyncio
+import io
 import json
+import math
+import struct
 import threading
 import unittest
+import wave
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
+from open_llm_vtuber.agent.output_types import Actions, DisplayText
+from open_llm_vtuber.conversations.tts_manager import TTSTaskManager
 from open_llm_vtuber.config_manager.tts import TTSConfig
 from open_llm_vtuber.tts.qwen_tts import TTSEngine as QwenTTSEngine
 from open_llm_vtuber.tts.tts_factory import TTSFactory
+
+
+def _build_test_wav_bytes() -> bytes:
+    sample_rate = 16_000
+    duration_seconds = 0.2
+    total_frames = int(sample_rate * duration_seconds)
+    buffer = io.BytesIO()
+
+    with wave.open(buffer, "wb") as wav_file:
+        wav_file.setnchannels(1)
+        wav_file.setsampwidth(2)
+        wav_file.setframerate(sample_rate)
+        frames = bytearray()
+        for index in range(total_frames):
+            amplitude = int(8_000 * math.sin(2 * math.pi * 440 * index / sample_rate))
+            frames.extend(struct.pack("<h", amplitude))
+        wav_file.writeframes(bytes(frames))
+
+    return buffer.getvalue()
 
 
 class _SpeechHandler(BaseHTTPRequestHandler):
@@ -22,7 +48,7 @@ class _SpeechHandler(BaseHTTPRequestHandler):
             }
         )
 
-        audio = b"RIFF" + b"\x00" * 40
+        audio = _build_test_wav_bytes()
         self.send_response(200)
         self.send_header("Content-Type", "audio/wav")
         self.send_header("Content-Length", str(len(audio)))
@@ -107,6 +133,52 @@ class QwenTTSTest(unittest.TestCase):
                 self.assertEqual(request["body"]["response_format"], "wav")
             finally:
                 engine.remove_file(str(audio_path), verbose=False)
+
+    def test_tts_manager_produces_audio_payload(self) -> None:
+        with _LocalSpeechServer() as local_server:
+            config = _build_config(f"http://127.0.0.1:{local_server.port}/v1")
+            engine = TTSFactory.get_tts_engine(
+                config.tts_model,
+                **config.qwen_tts.model_dump(),
+            )
+
+            async def run_test() -> list[dict]:
+                manager = TTSTaskManager()
+                sent_messages: list[dict] = []
+
+                async def websocket_send(message: str) -> None:
+                    sent_messages.append(json.loads(message))
+
+                await manager.speak(
+                    tts_text="Hello from the TTSTaskManager test.",
+                    display_text=DisplayText(
+                        text="Hello from the TTSTaskManager test.",
+                        name="AI",
+                    ),
+                    actions=Actions(expressions=[1]),
+                    live2d_model=None,
+                    tts_engine=engine,
+                    websocket_send=websocket_send,
+                )
+                await asyncio.gather(*manager.task_list)
+                await asyncio.wait_for(manager._payload_queue.join(), timeout=5)
+                await asyncio.sleep(0.05)
+                manager.clear()
+                return sent_messages
+
+            payloads = asyncio.run(run_test())
+            self.assertEqual(len(payloads), 1)
+
+            payload = payloads[0]
+            self.assertEqual(payload["type"], "audio")
+            self.assertIsNotNone(payload["audio"])
+            self.assertTrue(payload["volumes"])
+            self.assertEqual(payload["display_text"]["name"], "AI")
+            self.assertEqual(
+                payload["display_text"]["text"],
+                "Hello from the TTSTaskManager test.",
+            )
+            self.assertEqual(payload["actions"], {"expressions": [1]})
 
 
 if __name__ == "__main__":
