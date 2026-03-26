@@ -154,6 +154,17 @@ class TTSFactory:
                     "file_extension"
                 ),  # Will use default "mp3" if not in kwargs
             )
+        elif engine_type == "qwen_tts":
+            from .qwen_tts import TTSEngine as QwenTTSEngine
+
+            return QwenTTSEngine(
+                model=kwargs.get("model", "qwen3-tts-en-single"),
+                voice=kwargs.get("voice", "default"),
+                api_key=kwargs.get("api_key", "not-needed"),
+                base_url=kwargs.get("base_url", "http://localhost:8000/v1"),
+                file_extension=kwargs.get("file_extension", "wav"),
+                language=kwargs.get("language"),
+            )
 
         elif engine_type == "spark_tts":
             #         api_url: str = "http://127.0.0.1:7860/",
