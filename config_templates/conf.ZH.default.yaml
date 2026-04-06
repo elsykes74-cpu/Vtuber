@@ -448,6 +448,13 @@ character_config:
       volume: 1.0 # 语音音量（0.5 到 2.0）
       speed: 1.0 # 语音速度（0.6 到 1.5）
 
+    camb_tts:
+      api_key: '' # 从 https://studio.camb.ai 获取 API 密钥
+      voice_id: 147320 # CAMB AI 语音 ID
+      language: 'en-us' # BCP-47 语言代码（如 en-us、es-es、zh-cn、ja-jp）
+      speech_model: 'mars-flash' # MARS 模型：mars-flash（~150ms）、mars-pro、mars-instruct
+      output_format: 'wav' # 输出格式：wav、mp3��flac
+
   # =================== Voice Activity Detection ===================
   vad_config:
     vad_model: null

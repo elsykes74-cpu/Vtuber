@@ -211,6 +211,16 @@ class TTSFactory:
                 normalize_audio=kwargs.get("normalize_audio"),
                 use_cuda=kwargs.get("use_cuda"),
             )
+        elif engine_type == "camb_tts":
+            from .camb_tts import TTSEngine as CambTTSEngine
+
+            return CambTTSEngine(
+                api_key=kwargs.get("api_key"),
+                voice_id=kwargs.get("voice_id", 147320),
+                language=kwargs.get("language", "en-us"),
+                speech_model=kwargs.get("speech_model", "mars-flash"),
+                output_format=kwargs.get("output_format", "wav"),
+            )
         else:
             raise ValueError(f"Unknown TTS engine type: {engine_type}")
 

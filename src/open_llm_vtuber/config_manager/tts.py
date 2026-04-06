@@ -680,6 +680,38 @@ class CartesiaTTSConfig(I18nMixin):
     }
 
 
+class CambTTSConfig(I18nMixin):
+    """Configuration for CAMB AI TTS."""
+
+    api_key: str = Field(..., alias="api_key")
+    voice_id: int = Field(147320, alias="voice_id")
+    language: str = Field("en-us", alias="language")
+    speech_model: str = Field("mars-flash", alias="speech_model")
+    output_format: str = Field("wav", alias="output_format")
+
+    DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
+        "api_key": Description(
+            en="API key for CAMB AI TTS service", zh="CAMB AI TTS 服务的 API 密钥"
+        ),
+        "voice_id": Description(
+            en="Voice ID from CAMB AI (default: 147320)",
+            zh="来自 CAMB AI 的语音 ID（默认：147320）",
+        ),
+        "language": Description(
+            en="Language code in BCP-47 format (e.g., en-us, es-es, zh-cn)",
+            zh="BCP-47 格式的语言代码（如 en-us、es-es、zh-cn）",
+        ),
+        "speech_model": Description(
+            en="MARS speech model: mars-flash (~150ms), mars-pro (higher quality), mars-instruct (director-level)",
+            zh="MARS 语音模型：mars-flash（~150ms）、mars-pro（更高质量）、mars-instruct（导演级）",
+        ),
+        "output_format": Description(
+            en="Output audio format (wav, mp3, flac)",
+            zh="输出音频格式（wav、mp3、flac）",
+        ),
+    }
+
+
 class TTSConfig(I18nMixin):
     """Configuration for Text-to-Speech."""
 
@@ -702,6 +734,7 @@ class TTSConfig(I18nMixin):
         "elevenlabs_tts",
         "cartesia_tts",
         "piper_tts",
+        "camb_tts",
     ] = Field(..., alias="tts_model")
 
     azure_tts: Optional[AzureTTSConfig] = Field(None, alias="azure_tts")
@@ -726,6 +759,7 @@ class TTSConfig(I18nMixin):
     elevenlabs_tts: ElevenLabsTTSConfig | None = Field(None, alias="elevenlabs_tts")
     cartesia_tts: CartesiaTTSConfig | None = Field(None, alias="cartesia_tts")
     piper_tts: Optional[PiperTTSConfig] = Field(None, alias="piper_tts")
+    camb_tts: Optional[CambTTSConfig] = Field(None, alias="camb_tts")
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "tts_model": Description(
@@ -769,6 +803,9 @@ class TTSConfig(I18nMixin):
             en="Configuration for Cartesia TTS", zh="Cartesia TTS 配置"
         ),
         "piper_tts": Description(en="Configuration for Piper TTS", zh="Piper TTS 配置"),
+        "camb_tts": Description(
+            en="Configuration for CAMB AI TTS", zh="CAMB AI TTS 配置"
+        ),
     }
 
     @model_validator(mode="after")
@@ -813,4 +850,6 @@ class TTSConfig(I18nMixin):
 
         elif tts_model == "piper_tts" and values.piper_tts is not None:
             values.piper_tts.model_validate(values.piper_tts.model_dump())
+        elif tts_model == "camb_tts" and values.camb_tts is not None:
+            values.camb_tts.model_validate(values.camb_tts.model_dump())
         return values

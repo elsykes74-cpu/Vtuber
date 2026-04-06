@@ -453,6 +453,13 @@ character_config:
       volume: 1.0 # Voice volume (0.5 to 2.0)
       speed: 1.0 # Voice speed (0.6 to 1.5)
 
+    camb_tts:
+      api_key: '' # API key from https://studio.camb.ai
+      voice_id: 147320 # Voice ID from CAMB AI
+      language: 'en-us' # BCP-47 language code (e.g., en-us, es-es, zh-cn, ja-jp)
+      speech_model: 'mars-flash' # MARS model: mars-flash (~150ms), mars-pro, mars-instruct
+      output_format: 'wav' # Output format: wav, mp3, flac
+
   # =================== Voice Activity Detection ===================
   vad_config:
     vad_model: null
