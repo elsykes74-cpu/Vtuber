@@ -694,7 +694,7 @@ class Qwen3TTSConfig(I18nMixin):
     x_vector_only_mode: bool = Field(True, alias="x_vector_only_mode")
     instruct: str = Field("", alias="instruct")
     speaker: str = Field("", alias="speaker")
-    device: str = Field("cuda:0", alias="device")
+    device: str = Field("cuda", alias="device")
     attention: Literal["auto", "sage_attn", "flash_attn", "sdpa", "eager"] = Field(
         "auto", alias="attention"
     )

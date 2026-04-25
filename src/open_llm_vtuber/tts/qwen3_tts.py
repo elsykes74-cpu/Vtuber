@@ -160,7 +160,7 @@ class TTSEngine(TTSInterface):
         # custom_voice params
         speaker: str = "",
         # runtime
-        device: str = "cuda:0",
+        device: str = "cuda",
         attention: str = "auto",  # auto, sage_attn, flash_attn, sdpa, eager
         temperature: float = 0.9,
         top_k: int = 50,

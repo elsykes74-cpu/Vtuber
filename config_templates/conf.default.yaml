@@ -436,7 +436,7 @@ character_config:
       # --- custom_voice (model: *-CustomVoice) ---
       speaker: 'serena'            # serena, vivian, ryan, aiden, ono_anna, sohee
       # --- generation parameters ---
-      device: 'cuda:0'             # 'cuda:0', 'cuda', or 'cpu'
+      device: 'cuda'               # 'cuda' (any GPU, recommended), 'cuda:0'/'cuda:1'/... (specific GPU by index), or 'cpu'
       # Attention mechanism — controls inference speed. Priority: sage_attn > flash_attn > sdpa > eager
       #   auto       auto-selects best available
       #   sage_attn  fastest; install: uv pip install sageattention  (requires CUDA)
