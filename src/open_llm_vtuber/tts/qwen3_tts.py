@@ -207,6 +207,7 @@ class TTSEngine(TTSInterface):
         try:
             if self.seed >= 0:
                 torch.manual_seed(self.seed)
+                torch.cuda.manual_seed_all(self.seed)
             if self.model_type == "voice_design":
                 wavs, fs = self.model.generate_voice_design(
                     text=text,
