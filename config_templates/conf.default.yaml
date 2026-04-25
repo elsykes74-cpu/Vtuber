@@ -416,23 +416,38 @@ character_config:
     #                   available speakers: serena, vivian, ryan, aiden, ono_anna, sohee
     # Languages: english, spanish, french, german, japanese, korean, chinese, portuguese, russian, italian
     qwen3_tts:
-      model_path: 'Qwen/Qwen3-TTS-12Hz-1.7B-Base'  # HuggingFace repo id or local path; downloaded on first run
+      # Model selection — resolves to HuggingFace repo automatically.
+      # Available combinations:
+      #   voice_clone  + 0.6B → Qwen/Qwen3-TTS-12Hz-0.6B-Base
+      #   voice_clone  + 1.7B → Qwen/Qwen3-TTS-12Hz-1.7B-Base   (recommended)
+      #   voice_design + 1.7B → Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign
+      #   custom_voice + 0.6B → Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice
+      #   custom_voice + 1.7B → Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice
       model_type: 'voice_clone'    # 'voice_clone' | 'voice_design' | 'custom_voice'
-      language: 'english'
+      model_size: '1.7B'           # '0.6B' (fast) or '1.7B' (recommended); VoiceDesign only supports 1.7B
+      model_path: ''               # optional: local directory path; overrides model_type+model_size if set
+      language: 'english'          # english, spanish, french, german, japanese, korean, chinese, portuguese, russian, italian
       # --- voice_clone (model: *-Base) ---
-      ref_audio: ''                # path to reference wav file (3-10 seconds recommended)
+      ref_audio: ''                # path to reference wav file (3-10s recommended; 5-15s for best quality)
       ref_text: ''                 # transcript of ref_audio for ICL mode; leave empty to use x_vector_only_mode
       x_vector_only_mode: true     # true = speaker embedding only (no ref_text needed); false = ICL (ref_text required, higher fidelity)
       # --- voice_design (model: *-VoiceDesign) ---
-      instruct: 'A warm and expressive female voice'
+      instruct: 'A warm and expressive female voice'  # natural language voice style description
       # --- custom_voice (model: *-CustomVoice) ---
-      speaker: 'serena'            # see available speakers above
+      speaker: 'serena'            # serena, vivian, ryan, aiden, ono_anna, sohee
       # --- generation parameters ---
       device: 'cuda:0'             # 'cuda:0', 'cuda', or 'cpu'
-      temperature: 0.9             # sampling temperature; higher = more expressive/varied
-      top_k: 50
-      top_p: 1.0
-      max_new_tokens: 2048         # max codec tokens to generate (~30s of speech at 1.7B)
+      # Attention mechanism — controls inference speed. Priority: sage_attn > flash_attn > sdpa > eager
+      #   auto       auto-selects best available
+      #   sage_attn  fastest; install: uv pip install sageattention
+      #   flash_attn fast;    install: uv pip install flash-attn
+      #   sdpa       PyTorch built-in (no install needed)
+      #   eager      standard fallback (slowest, always available)
+      attention: 'auto'
+      temperature: 1.0             # sampling temperature; higher = more expressive/varied
+      top_k: 20                    # top-k sampling; lower = more focused output
+      top_p: 0.80                  # nucleus sampling probability threshold
+      max_new_tokens: 2048         # max codec tokens to generate (~30s of audio at 1.7B)
       seed: -1                     # random seed for reproducible output; -1 = random each time
 
     spark_tts:

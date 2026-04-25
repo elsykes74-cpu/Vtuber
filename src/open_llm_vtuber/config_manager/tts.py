@@ -683,10 +683,11 @@ class CartesiaTTSConfig(I18nMixin):
 class Qwen3TTSConfig(I18nMixin):
     """Configuration for Qwen3-TTS."""
 
-    model_path: str = Field("Qwen/Qwen3-TTS-12Hz-1.7B-Base", alias="model_path")
     model_type: Literal["voice_clone", "voice_design", "custom_voice"] = Field(
         "voice_clone", alias="model_type"
     )
+    model_size: Literal["0.6B", "1.7B"] = Field("1.7B", alias="model_size")
+    model_path: str = Field("", alias="model_path")
     language: str = Field("english", alias="language")
     ref_audio: str = Field("", alias="ref_audio")
     ref_text: str = Field("", alias="ref_text")
@@ -694,20 +695,27 @@ class Qwen3TTSConfig(I18nMixin):
     instruct: str = Field("", alias="instruct")
     speaker: str = Field("", alias="speaker")
     device: str = Field("cuda:0", alias="device")
-    temperature: float = Field(0.9, alias="temperature")
-    top_k: int = Field(50, alias="top_k")
-    top_p: float = Field(1.0, alias="top_p")
+    attention: Literal["auto", "sage_attn", "flash_attn", "sdpa", "eager"] = Field(
+        "auto", alias="attention"
+    )
+    temperature: float = Field(1.0, alias="temperature")
+    top_k: int = Field(20, alias="top_k")
+    top_p: float = Field(0.80, alias="top_p")
     max_new_tokens: int = Field(2048, alias="max_new_tokens")
     seed: int = Field(-1, alias="seed")
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
-        "model_path": Description(
-            en="HuggingFace repo id or local path to Qwen3-TTS model",
-            zh="Qwen3-TTS 模型的 HuggingFace repo id 或本地路径",
-        ),
         "model_type": Description(
             en="Mode: voice_clone (Base model), voice_design (VoiceDesign model), custom_voice (CustomVoice model)",
             zh="模式：voice_clone（Base 模型）、voice_design（VoiceDesign 模型）、custom_voice（CustomVoice 模型）",
+        ),
+        "model_size": Description(
+            en="Model size: 0.6B (fast, lower quality) or 1.7B (recommended). VoiceDesign only supports 1.7B.",
+            zh="模型大小：0.6B（快，质量较低）或 1.7B（推荐）。VoiceDesign 仅支持 1.7B。",
+        ),
+        "model_path": Description(
+            en="Optional local path override. Leave empty to auto-download from HuggingFace based on model_type and model_size.",
+            zh="可选本地路径覆盖。留空则根据 model_type 和 model_size 自动从 HuggingFace 下载。",
         ),
         "language": Description(
             en="Output language (e.g. english, spanish, japanese, chinese)",
@@ -736,6 +744,10 @@ class Qwen3TTSConfig(I18nMixin):
         "device": Description(
             en="PyTorch device string (e.g. cuda:0, cpu)",
             zh="PyTorch 设备字符串（如 cuda:0、cpu）",
+        ),
+        "attention": Description(
+            en="Attention implementation: auto (best available), sage_attn (fastest, pip install sageattention), flash_attn (fast, pip install flash-attn), sdpa (built-in), eager (slowest, built-in)",
+            zh="注意力实现：auto（自动选择最优）、sage_attn（最快，需安装 sageattention）、flash_attn（快，需安装 flash-attn）、sdpa（内置）、eager（最慢，内置）",
         ),
         "temperature": Description(en="Sampling temperature", zh="采样温度"),
         "top_k": Description(en="Top-k sampling", zh="Top-k 采样"),

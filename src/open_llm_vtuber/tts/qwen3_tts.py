@@ -5,6 +5,115 @@ from loguru import logger
 from .tts_interface import TTSInterface
 from .qwen_tts import Qwen3TTSModel
 
+# Maps (hf_family, size) → HuggingFace repo id.
+# model_type in config maps to hf_family: voice_clone→Base, voice_design→VoiceDesign, custom_voice→CustomVoice
+_HF_MODEL_MAP = {
+    ("Base", "0.6B"): "Qwen/Qwen3-TTS-12Hz-0.6B-Base",
+    ("Base", "1.7B"): "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+    ("VoiceDesign", "1.7B"): "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+    ("CustomVoice", "0.6B"): "Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice",
+    ("CustomVoice", "1.7B"): "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
+}
+
+_MODEL_TYPE_TO_FAMILY = {
+    "voice_clone": "Base",
+    "voice_design": "VoiceDesign",
+    "custom_voice": "CustomVoice",
+}
+
+
+def _resolve_model_path(model_type: str, model_size: str, model_path: str) -> str:
+    """Return local path if provided, otherwise derive the HF repo id."""
+    if model_path:
+        return model_path
+    family = _MODEL_TYPE_TO_FAMILY.get(model_type, "Base")
+    key = (family, model_size)
+    if key not in _HF_MODEL_MAP:
+        raise ValueError(
+            f"No HF model for model_type='{model_type}', model_size='{model_size}'. "
+            f"Valid sizes: {sorted({k[1] for k in _HF_MODEL_MAP})}. "
+            "Or set model_path to a local directory."
+        )
+    return _HF_MODEL_MAP[key]
+
+
+def _resolve_attention(selection: str) -> str:
+    """Return the best available attention implementation.
+
+    Priority for 'auto': sage_attn > flash_attn > sdpa > eager.
+    For explicit selections, falls back to sdpa/eager if unavailable.
+    Returns one of: 'sage_attn', 'flash_attn', 'sdpa', 'eager'.
+    """
+    available = ["sdpa", "eager"]
+    try:
+        import flash_attn  # noqa: F401
+        available.insert(0, "flash_attn")
+    except ImportError:
+        pass
+    try:
+        from sageattention import sageattn  # noqa: F401
+        available.insert(0, "sage_attn")
+    except ImportError:
+        pass
+
+    if selection == "auto":
+        chosen = available[0]
+        logger.info(f"Qwen3-TTS attention auto-selected: {chosen}")
+        return chosen
+
+    if selection in available:
+        return selection
+
+    fallback = "sdpa" if "sdpa" in available else "eager"
+    logger.warning(
+        f"Qwen3-TTS attention '{selection}' not available, falling back to {fallback}"
+    )
+    return fallback
+
+
+def _load_model_with_attention(
+    model_path: str, attn: str, device: str
+) -> Qwen3TTSModel:
+    """Load Qwen3TTSModel with the resolved attention implementation."""
+    dtype = torch.bfloat16
+
+    if attn == "sage_attn":
+        try:
+            from sageattention import sageattn
+            model = Qwen3TTSModel.from_pretrained(
+                model_path, device_map=device, torch_dtype=dtype
+            )
+            patched = 0
+            for name, module in model.model.named_modules():
+                if hasattr(module, "forward") and (
+                    "Attention" in type(module).__name__ or "attn" in name.lower()
+                ):
+                    try:
+                        orig = module.forward
+                        def _make(orig_fwd):
+                            def _sage(*args, **kwargs):
+                                if len(args) >= 3:
+                                    q, k, v = args[0], args[1], args[2]
+                                    mask = kwargs.get("attention_mask", None)
+                                    return sageattn(q, k, v, is_causal=False, attn_mask=mask)
+                                return orig_fwd(*args, **kwargs)
+                            return _sage
+                        module.forward = _make(orig)
+                        patched += 1
+                    except Exception:
+                        pass
+            logger.info(f"Qwen3-TTS sage_attn patched {patched} attention modules.")
+            return model
+        except Exception as e:
+            logger.warning(f"Qwen3-TTS sage_attn failed ({e}), falling back to sdpa.")
+            attn = "sdpa"
+
+    attn_map = {"flash_attn": "flash_attention_2", "sdpa": "sdpa", "eager": "eager"}
+    kwargs = {"device_map": device, "torch_dtype": dtype}
+    if attn in attn_map:
+        kwargs["attn_implementation"] = attn_map[attn]
+    return Qwen3TTSModel.from_pretrained(model_path, **kwargs)
+
 
 class TTSEngine(TTSInterface):
     """
@@ -15,11 +124,8 @@ class TTSEngine(TTSInterface):
       - voice_design:  generates a voice from a natural-language instruction
       - custom_voice:  uses a predefined speaker name
 
-    Model checkpoints (HF repo id or local path):
-      - voice_clone   → Qwen/Qwen3-TTS-12Hz-1.7B-Base
-      - voice_design  → Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign
-      - custom_voice  → Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice
-                        speakers: serena, vivian, ryan, aiden, ono_anna, sohee
+    Model is resolved from (model_type, model_size) automatically.
+    Set model_path to override with a local directory.
 
     Languages: english, spanish, french, german, japanese, korean, chinese,
                portuguese, russian, italian (auto also accepted)
@@ -27,8 +133,9 @@ class TTSEngine(TTSInterface):
 
     def __init__(
         self,
-        model_path: str,
         model_type: str = "voice_clone",
+        model_size: str = "1.7B",
+        model_path: str = "",
         language: str = "english",
         # voice_clone params
         ref_audio: str = "",
@@ -40,6 +147,7 @@ class TTSEngine(TTSInterface):
         speaker: str = "",
         # runtime
         device: str = "cuda:0",
+        attention: str = "auto",  # auto, sage_attn, flash_attn, sdpa, eager
         temperature: float = 0.9,
         top_k: int = 50,
         top_p: float = 1.0,
@@ -60,12 +168,10 @@ class TTSEngine(TTSInterface):
         )
         self.file_extension = "wav"
 
-        logger.info(f"Loading Qwen3-TTS [{model_type}] from {model_path} ...")
-        self.model = Qwen3TTSModel.from_pretrained(
-            model_path,
-            device_map=device,
-            torch_dtype=torch.bfloat16,
-        )
+        resolved_path = _resolve_model_path(model_type, model_size, model_path)
+        attn = _resolve_attention(attention)
+        logger.info(f"Loading Qwen3-TTS [{model_type}] from {resolved_path} (attn={attn}) ...")
+        self.model = _load_model_with_attention(resolved_path, attn, device)
         logger.info("Qwen3-TTS model loaded.")
 
         # Pre-encode voice clone prompt once at startup (avoids re-encoding on every call)
