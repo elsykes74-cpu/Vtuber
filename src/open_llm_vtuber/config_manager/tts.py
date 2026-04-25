@@ -698,6 +698,7 @@ class Qwen3TTSConfig(I18nMixin):
     top_k: int = Field(50, alias="top_k")
     top_p: float = Field(1.0, alias="top_p")
     max_new_tokens: int = Field(2048, alias="max_new_tokens")
+    seed: int = Field(-1, alias="seed")
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "model_path": Description(
@@ -741,6 +742,10 @@ class Qwen3TTSConfig(I18nMixin):
         "top_p": Description(en="Top-p (nucleus) sampling", zh="Top-p 采样"),
         "max_new_tokens": Description(
             en="Maximum number of new tokens to generate", zh="最大生成 token 数"
+        ),
+        "seed": Description(
+            en="Random seed for reproducible output (-1 = random each time)",
+            zh="随机种子，用于可复现的输出（-1 = 每次随机）",
         ),
     }
 

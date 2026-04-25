@@ -44,12 +44,14 @@ class TTSEngine(TTSInterface):
         top_k: int = 50,
         top_p: float = 1.0,
         max_new_tokens: int = 2048,
+        seed: int = -1,
     ):
         self.model_type = model_type
         self.language = language
         self.instruct = instruct
         self.speaker = speaker
         self.x_vector_only_mode = x_vector_only_mode
+        self.seed = seed
         self.gen_kwargs = dict(
             temperature=temperature,
             top_k=top_k,
@@ -80,6 +82,8 @@ class TTSEngine(TTSInterface):
     def generate_audio(self, text: str, file_name_no_ext=None) -> str:
         file_name = self.generate_cache_file_name(file_name_no_ext, self.file_extension)
         try:
+            if self.seed >= 0:
+                torch.manual_seed(self.seed)
             if self.model_type == "voice_design":
                 wavs, fs = self.model.generate_voice_design(
                     text=text,

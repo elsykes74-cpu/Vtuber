@@ -433,6 +433,7 @@ character_config:
       top_k: 50
       top_p: 1.0
       max_new_tokens: 2048         # max codec tokens to generate (~30s of speech at 1.7B)
+      seed: -1                     # random seed for reproducible output; -1 = random each time
 
     spark_tts:
       api_url: 'http://127.0.0.1:6006/' # API URL. Uses Gradio's built-in front-end API. Repository: https://github.com/SparkAudio/Spark-TTS
