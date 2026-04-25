@@ -23,9 +23,17 @@ _MODEL_TYPE_TO_FAMILY = {
 
 
 def _resolve_model_path(model_type: str, model_size: str, model_path: str) -> str:
-    """Return local path if provided, otherwise derive the HF repo id."""
+    """Return a fully-downloaded local path.
+
+    If model_path is set, return it directly (assumed complete local directory).
+    Otherwise resolve the HF repo id from model_type+model_size and use
+    snapshot_download to ensure all files (including speech_tokenizer/) are present.
+    """
+    import os
+
     if model_path:
         return model_path
+
     family = _MODEL_TYPE_TO_FAMILY.get(model_type, "Base")
     key = (family, model_size)
     if key not in _HF_MODEL_MAP:
@@ -34,7 +42,13 @@ def _resolve_model_path(model_type: str, model_size: str, model_path: str) -> st
             f"Valid sizes: {sorted({k[1] for k in _HF_MODEL_MAP})}. "
             "Or set model_path to a local directory."
         )
-    return _HF_MODEL_MAP[key]
+    repo_id = _HF_MODEL_MAP[key]
+
+    from huggingface_hub import snapshot_download
+
+    logger.info(f"Ensuring full model snapshot for {repo_id} ...")
+    local_dir = snapshot_download(repo_id)
+    return local_dir
 
 
 def _resolve_attention(selection: str) -> str:
