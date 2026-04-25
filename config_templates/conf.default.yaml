@@ -277,7 +277,7 @@ character_config:
     #   'azure_tts', 'pyttsx3_tts', 'edge_tts', 'bark_tts',
     #   'cosyvoice_tts', 'melo_tts', 'coqui_tts', 'piper_tts',
     #   'fish_api_tts', 'x_tts', 'gpt_sovits_tts', 'sherpa_onnx_tts'
-    #   'minimax_tts', 'elevenlabs_tts', 'cartesia_tts'
+    #   'minimax_tts', 'elevenlabs_tts', 'cartesia_tts', 'qwen3_tts'
 
     azure_tts:
       api_key: 'azure-api-key'
@@ -405,7 +405,35 @@ character_config:
       num_threads: 1 # Number of computation threads
       speed: 1.0 # Speech speed (1.0 is normal)
       debug: false # Enable debug mode (True/False)
-    
+
+    # Qwen3-TTS: high-quality LLM-based TTS by Alibaba with multilingual support and voice cloning
+    # Install extra deps: uv pip install --extra qwen3-tts
+    # Models: https://huggingface.co/collections/Qwen/qwen3-tts-681d2d3b8db29eb420e1e7c7
+    # Three modes:
+    #   voice_clone   - stable voice cloning from a reference audio file (model: *-Base)
+    #   voice_design  - describe the desired voice in natural language   (model: *-VoiceDesign)
+    #   custom_voice  - predefined speaker names                         (model: *-CustomVoice)
+    #                   available speakers: serena, vivian, ryan, aiden, ono_anna, sohee
+    # Languages: english, spanish, french, german, japanese, korean, chinese, portuguese, russian, italian
+    qwen3_tts:
+      model_path: 'Qwen/Qwen3-TTS-12Hz-1.7B-Base'  # HuggingFace repo id or local path; downloaded on first run
+      model_type: 'voice_clone'    # 'voice_clone' | 'voice_design' | 'custom_voice'
+      language: 'english'
+      # --- voice_clone (model: *-Base) ---
+      ref_audio: ''                # path to reference wav file (3-10 seconds recommended)
+      ref_text: ''                 # transcript of ref_audio for ICL mode; leave empty to use x_vector_only_mode
+      x_vector_only_mode: true     # true = speaker embedding only (no ref_text needed); false = ICL (ref_text required, higher fidelity)
+      # --- voice_design (model: *-VoiceDesign) ---
+      instruct: 'A warm and expressive female voice'
+      # --- custom_voice (model: *-CustomVoice) ---
+      speaker: 'serena'            # see available speakers above
+      # --- generation parameters ---
+      device: 'cuda:0'             # 'cuda:0', 'cuda', or 'cpu'
+      temperature: 0.9             # sampling temperature; higher = more expressive/varied
+      top_k: 50
+      top_p: 1.0
+      max_new_tokens: 2048         # max codec tokens to generate (~30s of speech at 1.7B)
+
     spark_tts:
       api_url: 'http://127.0.0.1:6006/' # API URL. Uses Gradio's built-in front-end API. Repository: https://github.com/SparkAudio/Spark-TTS
       api_name:  "voice_clone" # Endpoint name. Options: voice_clone, voice_creation

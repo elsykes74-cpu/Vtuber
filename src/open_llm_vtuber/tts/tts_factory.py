@@ -211,6 +211,10 @@ class TTSFactory:
                 normalize_audio=kwargs.get("normalize_audio"),
                 use_cuda=kwargs.get("use_cuda"),
             )
+        elif engine_type == "qwen3_tts":
+            from .qwen3_tts import TTSEngine as Qwen3TTSEngine
+
+            return Qwen3TTSEngine(**kwargs)
         else:
             raise ValueError(f"Unknown TTS engine type: {engine_type}")
 
