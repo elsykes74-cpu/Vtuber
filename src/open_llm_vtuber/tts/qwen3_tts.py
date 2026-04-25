@@ -37,9 +37,10 @@ def _resolve_model_path(model_type: str, model_size: str, model_path: str) -> st
     family = _MODEL_TYPE_TO_FAMILY.get(model_type, "Base")
     key = (family, model_size)
     if key not in _HF_MODEL_MAP:
+        valid_sizes = sorted({s for (f, s) in _HF_MODEL_MAP if f == family})
         raise ValueError(
-            f"No HF model for model_type='{model_type}', model_size='{model_size}'. "
-            f"Valid sizes: {sorted({k[1] for k in _HF_MODEL_MAP})}. "
+            f"model_type='{model_type}' (family='{family}') does not support model_size='{model_size}'. "
+            f"Valid sizes for this mode: {valid_sizes}. "
             "Or set model_path to a local directory."
         )
     repo_id = _HF_MODEL_MAP[key]
