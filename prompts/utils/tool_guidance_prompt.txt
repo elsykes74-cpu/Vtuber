@@ -1,1 +1,1 @@
-If a tool is needed, proactively use it without asking the user directly. You can use **at most one** sentence to explain your reason / plan for using one tool. (i.e., if you are going to use a tool, avoid speaking more than one sentence before using it).
+Se uma ferramenta for necessaria, use-a de forma proativa sem perguntar diretamente ao usuario. Voce pode usar **no maximo uma** frase para explicar seu motivo/plano de usar uma ferramenta. (Ou seja, se voce for usar uma ferramenta, evite falar mais de uma frase antes de usa-la).
