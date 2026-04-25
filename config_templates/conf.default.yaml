@@ -439,7 +439,7 @@ character_config:
       device: 'cuda:0'             # 'cuda:0', 'cuda', or 'cpu'
       # Attention mechanism — controls inference speed. Priority: sage_attn > flash_attn > sdpa > eager
       #   auto       auto-selects best available
-      #   sage_attn  fastest; install: uv pip install sageattention
+      #   sage_attn  fastest; install: uv pip install sageattention  (requires CUDA)
       #   flash_attn fast;    install: uv pip install flash-attn
       #   sdpa       PyTorch built-in (no install needed)
       #   eager      standard fallback (slowest, always available)
