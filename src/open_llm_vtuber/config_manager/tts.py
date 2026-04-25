@@ -702,6 +702,7 @@ class Qwen3TTSConfig(I18nMixin):
     top_k: int = Field(20, alias="top_k")
     top_p: float = Field(0.80, alias="top_p")
     max_new_tokens: int = Field(2048, alias="max_new_tokens")
+    repetition_penalty: float = Field(1.05, alias="repetition_penalty")
     seed: int = Field(-1, alias="seed")
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
@@ -754,6 +755,10 @@ class Qwen3TTSConfig(I18nMixin):
         "top_p": Description(en="Top-p (nucleus) sampling", zh="Top-p 采样"),
         "max_new_tokens": Description(
             en="Maximum number of new tokens to generate", zh="最大生成 token 数"
+        ),
+        "repetition_penalty": Description(
+            en="Penalty to reduce repeated tokens/codes (1.0 = disabled, >1.0 = penalise repetition)",
+            zh="减少重复 token 的惩罚（1.0 = 禁用，>1.0 = 惩罚重复）",
         ),
         "seed": Description(
             en="Random seed for reproducible output (-1 = random each time)",

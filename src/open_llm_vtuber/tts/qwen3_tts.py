@@ -152,6 +152,7 @@ class TTSEngine(TTSInterface):
         top_k: int = 50,
         top_p: float = 1.0,
         max_new_tokens: int = 2048,
+        repetition_penalty: float = 1.05,
         seed: int = -1,
     ):
         self.model_type = model_type
@@ -165,6 +166,7 @@ class TTSEngine(TTSInterface):
             top_k=top_k,
             top_p=top_p,
             max_new_tokens=max_new_tokens,
+            repetition_penalty=repetition_penalty,
         )
         self.file_extension = "wav"
 

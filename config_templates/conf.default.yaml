@@ -448,6 +448,7 @@ character_config:
       top_k: 20                    # top-k sampling; lower = more focused output
       top_p: 0.80                  # nucleus sampling probability threshold
       max_new_tokens: 2048         # max codec tokens to generate (~30s of audio at 1.7B)
+      repetition_penalty: 1.05     # penalises repeated tokens; 1.0 = disabled, >1.0 = less repetition
       seed: -1                     # random seed for reproducible output; -1 = random each time
 
     spark_tts:
