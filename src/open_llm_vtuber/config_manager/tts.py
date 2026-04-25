@@ -680,6 +680,71 @@ class CartesiaTTSConfig(I18nMixin):
     }
 
 
+class Qwen3TTSConfig(I18nMixin):
+    """Configuration for Qwen3-TTS."""
+
+    model_path: str = Field("Qwen/Qwen3-TTS-12Hz-1.7B-Base", alias="model_path")
+    model_type: Literal["voice_clone", "voice_design", "custom_voice"] = Field(
+        "voice_clone", alias="model_type"
+    )
+    language: str = Field("english", alias="language")
+    ref_audio: str = Field("", alias="ref_audio")
+    ref_text: str = Field("", alias="ref_text")
+    x_vector_only_mode: bool = Field(True, alias="x_vector_only_mode")
+    instruct: str = Field("", alias="instruct")
+    speaker: str = Field("", alias="speaker")
+    device: str = Field("cuda:0", alias="device")
+    temperature: float = Field(0.9, alias="temperature")
+    top_k: int = Field(50, alias="top_k")
+    top_p: float = Field(1.0, alias="top_p")
+    max_new_tokens: int = Field(2048, alias="max_new_tokens")
+
+    DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
+        "model_path": Description(
+            en="HuggingFace repo id or local path to Qwen3-TTS model",
+            zh="Qwen3-TTS 模型的 HuggingFace repo id 或本地路径",
+        ),
+        "model_type": Description(
+            en="Mode: voice_clone (Base model), voice_design (VoiceDesign model), custom_voice (CustomVoice model)",
+            zh="模式：voice_clone（Base 模型）、voice_design（VoiceDesign 模型）、custom_voice（CustomVoice 模型）",
+        ),
+        "language": Description(
+            en="Output language (e.g. english, spanish, japanese, chinese)",
+            zh="输出语言（如 english、spanish、japanese、chinese）",
+        ),
+        "ref_audio": Description(
+            en="[voice_clone] Path to reference wav file (3-10s recommended)",
+            zh="[voice_clone] 参考音频路径（建议 3-10 秒）",
+        ),
+        "ref_text": Description(
+            en="[voice_clone] Transcript of ref_audio for ICL mode; leave empty for x_vector_only",
+            zh="[voice_clone] 参考音频的文本（ICL 模式）；留空则使用 x_vector_only 模式",
+        ),
+        "x_vector_only_mode": Description(
+            en="[voice_clone] Use speaker embedding only (no ref_text needed); false = ICL mode (ref_text required)",
+            zh="[voice_clone] 仅使用说话人嵌入（无需 ref_text）；false = ICL 模式（需要 ref_text）",
+        ),
+        "instruct": Description(
+            en="[voice_design] Natural language voice style description",
+            zh="[voice_design] 自然语言音色风格描述",
+        ),
+        "speaker": Description(
+            en="[custom_voice] Predefined speaker name: serena, vivian, ryan, aiden, ono_anna, sohee",
+            zh="[custom_voice] 预设说话人名称：serena、vivian、ryan、aiden、ono_anna、sohee",
+        ),
+        "device": Description(
+            en="PyTorch device string (e.g. cuda:0, cpu)",
+            zh="PyTorch 设备字符串（如 cuda:0、cpu）",
+        ),
+        "temperature": Description(en="Sampling temperature", zh="采样温度"),
+        "top_k": Description(en="Top-k sampling", zh="Top-k 采样"),
+        "top_p": Description(en="Top-p (nucleus) sampling", zh="Top-p 采样"),
+        "max_new_tokens": Description(
+            en="Maximum number of new tokens to generate", zh="最大生成 token 数"
+        ),
+    }
+
+
 class TTSConfig(I18nMixin):
     """Configuration for Text-to-Speech."""
 
@@ -702,6 +767,7 @@ class TTSConfig(I18nMixin):
         "elevenlabs_tts",
         "cartesia_tts",
         "piper_tts",
+        "qwen3_tts",
     ] = Field(..., alias="tts_model")
 
     azure_tts: Optional[AzureTTSConfig] = Field(None, alias="azure_tts")
@@ -726,6 +792,7 @@ class TTSConfig(I18nMixin):
     elevenlabs_tts: ElevenLabsTTSConfig | None = Field(None, alias="elevenlabs_tts")
     cartesia_tts: CartesiaTTSConfig | None = Field(None, alias="cartesia_tts")
     piper_tts: Optional[PiperTTSConfig] = Field(None, alias="piper_tts")
+    qwen3_tts: Optional[Qwen3TTSConfig] = Field(None, alias="qwen3_tts")
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "tts_model": Description(
@@ -769,6 +836,9 @@ class TTSConfig(I18nMixin):
             en="Configuration for Cartesia TTS", zh="Cartesia TTS 配置"
         ),
         "piper_tts": Description(en="Configuration for Piper TTS", zh="Piper TTS 配置"),
+        "qwen3_tts": Description(
+            en="Configuration for Qwen3-TTS", zh="Qwen3-TTS 配置"
+        ),
     }
 
     @model_validator(mode="after")
@@ -813,4 +883,6 @@ class TTSConfig(I18nMixin):
 
         elif tts_model == "piper_tts" and values.piper_tts is not None:
             values.piper_tts.model_validate(values.piper_tts.model_dump())
+        elif tts_model == "qwen3_tts" and values.qwen3_tts is not None:
+            values.qwen3_tts.model_validate(values.qwen3_tts.model_dump())
         return values
