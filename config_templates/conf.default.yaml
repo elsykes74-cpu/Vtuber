@@ -419,12 +419,12 @@ character_config:
       # Model selection — resolves to HuggingFace repo automatically.
       # Available combinations:
       #   voice_clone  + 0.6B → Qwen/Qwen3-TTS-12Hz-0.6B-Base
-      #   voice_clone  + 1.7B → Qwen/Qwen3-TTS-12Hz-1.7B-Base   (recommended)
+      #   voice_clone  + 1.7B → Qwen/Qwen3-TTS-12Hz-1.7B-Base
       #   voice_design + 1.7B → Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign
       #   custom_voice + 0.6B → Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice
       #   custom_voice + 1.7B → Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice
       model_type: 'voice_clone'    # 'voice_clone' | 'voice_design' | 'custom_voice'
-      model_size: '1.7B'           # '0.6B' (fast) or '1.7B' (recommended); VoiceDesign only supports 1.7B
+      model_size: '1.7B'           # '0.6B' (faster, lower VRAM) or '1.7B' (higher capacity); VoiceDesign only supports 1.7B
       model_path: ''               # optional: local directory path; overrides model_type+model_size if set
       language: 'english'          # english, spanish, french, german, japanese, korean, chinese, portuguese, russian, italian
       # --- voice_clone (model: *-Base) ---
