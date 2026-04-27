@@ -431,10 +431,10 @@ character_config:
       # ref_audio: ''              # path to reference wav file (3-10s recommended; 5-15s for best quality); required for voice_clone
       ref_text: ''                 # transcript of ref_audio for ICL mode; leave empty to use x_vector_only_mode
       x_vector_only_mode: true     # true = speaker embedding only (no ref_text needed); false = ICL (ref_text required, higher fidelity)
-      # --- voice_design (model: *-VoiceDesign) ---
-      instruct: 'A warm and expressive female voice'  # voice_design: style description; custom_voice: optional style modifier for the predefined speaker (leave empty for default)
+      # --- voice_design / custom_voice ---
+      instruct: 'A warm and expressive female voice'  # voice_design: natural-language style description; custom_voice: optional style modifier (leave empty for default)
       # --- custom_voice (model: *-CustomVoice) ---
-      speaker: 'serena'            # serena, vivian, ryan, aiden, ono_anna, sohee
+      speaker: 'serena'            # predefined speaker name: serena, vivian, ryan, aiden, ono_anna, sohee
       # --- generation parameters ---
       device: 'cuda'               # 'cuda' (any GPU, recommended), 'cuda:0'/'cuda:1'/... (specific GPU by index), or 'cpu'
       # Attention mechanism — controls inference speed. Priority: sage_attn > flash_attn > sdpa > eager

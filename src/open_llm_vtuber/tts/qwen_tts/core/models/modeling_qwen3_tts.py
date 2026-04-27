@@ -1850,16 +1850,18 @@ class Qwen3TTSForConditionalGeneration(Qwen3TTSPreTrainedModel, GenerationMixin)
             pretrained_model_name_or_path,
             "speech_tokenizer/config.json",
             subfolder=kwargs.pop("subfolder", None),
-            cache_dir=kwargs.pop("cache_dir", None),
-            force_download=kwargs.pop("force_download", False),
+            cache_dir=cache_dir,
+            force_download=force_download,
             proxies=kwargs.pop("proxies", None),
             resume_download=kwargs.pop("resume_download", None),
-            local_files_only=kwargs.pop("local_files_only", False),
-            token=kwargs.pop("use_auth_token", None),
-            revision=kwargs.pop("revision", None),
+            local_files_only=local_files_only,
+            token=token,
+            revision=revision,
         )
         if speech_tokenizer_path is None:
-            raise ValueError(f"""{pretrained_model_name_or_path}/{speech_tokenizer_path} not exists""")
+            raise ValueError(
+                f"{pretrained_model_name_or_path}/speech_tokenizer/config.json not exists"
+            )
         speech_tokenizer_dir = os.path.dirname(speech_tokenizer_path)
         speech_tokenizer = Qwen3TTSTokenizer.from_pretrained(
             speech_tokenizer_dir,
@@ -1872,13 +1874,13 @@ class Qwen3TTSForConditionalGeneration(Qwen3TTSPreTrainedModel, GenerationMixin)
             pretrained_model_name_or_path,
             "generation_config.json",
             subfolder=kwargs.pop("subfolder", None),
-            cache_dir=kwargs.pop("cache_dir", None),
-            force_download=kwargs.pop("force_download", False),
+            cache_dir=cache_dir,
+            force_download=force_download,
             proxies=kwargs.pop("proxies", None),
             resume_download=kwargs.pop("resume_download", None),
-            local_files_only=kwargs.pop("local_files_only", False),
-            token=kwargs.pop("use_auth_token", None),
-            revision=kwargs.pop("revision", None),
+            local_files_only=local_files_only,
+            token=token,
+            revision=revision,
         )
         with open(generate_config_path, "r", encoding="utf-8") as f:
             generate_config = json.load(f)
