@@ -220,6 +220,7 @@ class TTSEngine(TTSInterface):
                     text=text,
                     speaker=self.speaker,
                     language=self.language,
+                    instruct=self.instruct or None,
                     **self.gen_kwargs,
                 )
             else:  # voice_clone

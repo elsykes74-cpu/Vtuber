@@ -432,7 +432,7 @@ character_config:
       ref_text: ''                 # transcript of ref_audio for ICL mode; leave empty to use x_vector_only_mode
       x_vector_only_mode: true     # true = speaker embedding only (no ref_text needed); false = ICL (ref_text required, higher fidelity)
       # --- voice_design (model: *-VoiceDesign) ---
-      instruct: 'A warm and expressive female voice'  # natural language voice style description
+      instruct: 'A warm and expressive female voice'  # voice_design: style description; custom_voice: optional style modifier for the predefined speaker (leave empty for default)
       # --- custom_voice (model: *-CustomVoice) ---
       speaker: 'serena'            # serena, vivian, ryan, aiden, ono_anna, sohee
       # --- generation parameters ---

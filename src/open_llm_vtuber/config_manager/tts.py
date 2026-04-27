@@ -757,8 +757,8 @@ class Qwen3TTSConfig(I18nMixin):
             zh="[voice_clone] 仅使用说话人嵌入（无需 ref_text）；false = ICL 模式（需要 ref_text）",
         ),
         "instruct": Description(
-            en="[voice_design] Natural language voice style description",
-            zh="[voice_design] 自然语言音色风格描述",
+            en="[voice_design/custom_voice] Natural language style description; for custom_voice it optionally modifies the predefined speaker's style",
+            zh="[voice_design/custom_voice] 自然语言风格描述；对于 custom_voice，可选地修改预设说话人的风格",
         ),
         "speaker": Description(
             en="[custom_voice] Predefined speaker name: serena, vivian, ryan, aiden, ono_anna, sohee",
