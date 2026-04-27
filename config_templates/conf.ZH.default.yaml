@@ -409,7 +409,50 @@ character_config:
       gender:  "female" # 生成声线，api_name: = "voice_creation"时填写
       pitch:  3 # 音高，api_name: = "voice_creation"时填写
       speed:  3 # 语速，api_name: = "voice_creation"时填写
-
+    # Qwen3-TTS: 阿里巴巴出品的高质量基于 LLM 的 TTS，支持多语言和声音克隆
+    # 安装额外依赖: uv pip install --extra qwen3-tts
+    # 模型地址: https://huggingface.co/collections/Qwen/qwen3-tts-681d2d3b8db29eb420e1e7c7
+    # 三种模式:
+    #    voice_clone   - 从参考音频文件进行稳定的声音克隆 (模型: *-Base)
+    #    voice_design  - 使用自然语言描述所需的声线 (模型: *-VoiceDesign)
+    #    custom_voice  - 使用预定义的说话人名称 (模型: *-CustomVoice)
+    #                    可用说话人: serena, vivian, ryan, aiden, ono_anna, sohee
+    # 支持语言: 英语, 西班牙语, 法语, 德语, 日语, 韩语, 中文, 葡萄牙语, 俄语, 意大利语
+    qwen3_tts:
+      # 模型选择 — 自动解析 HuggingFace 仓库
+      # 可用组合:
+      #    voice_clone  + 0.6B → Qwen/Qwen3-TTS-12Hz-0.6B-Base
+      #    voice_clone  + 1.7B → Qwen/Qwen3-TTS-12Hz-1.7B-Base
+      #    voice_design + 1.7B → Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign
+      #    custom_voice + 0.6B → Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice
+      #    custom_voice + 1.7B → Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice
+      model_type: 'custom_voice'   # 'custom_voice' (默认说话人) | 'voice_clone' (需要参考音频) | 'voice_design'
+      model_size: '1.7B'           # '0.6B' (更快，显存占用低) 或 '1.7B' (能力更强); VoiceDesign 仅支持 1.7B
+      model_path: ''               # 可选: 本地目录路径; 如果设置将覆盖 model_type+model_size
+      language: 'chinese'          # english, spanish, french, german, japanese, korean, chinese, portuguese, russian, italian
+      # --- 适用于 model_type: 'voice_clone' ---
+      ref_audio: ''                                   # 参考 wav 文件路径 (建议 3-10s; 5-15s 质量最佳); voice_clone 模式必填
+      ref_text: ''                                    # 参考音频的转写文本 (ICL 模式); 留空则使用 x_vector_only_mode
+      x_vector_only_mode: true                        # true = 仅提取说话人特征 (不需要 ref_text); false = ICL (需要 ref_text，还原度更高)
+      # --- 适用于 model_type: 'custom_voice' ---
+      speaker: 'serena'                               # 预定义说话人: serena, vivian, ryan, aiden, ono_anna, sohee
+      # --- 适用于 model_type: 'custom_voice, voice_design' ---
+      instruct: 'A warm and expressive female voice'  # voice_design: 自然语言风格描述; custom_voice: 可选的风格修饰词 (留空为默认)
+      # --- 生成参数 ---
+      device: 'cuda'               # 'cuda' (推荐), 'cuda:0' (指定 GPU), 或 'cpu'
+      # 注意力机制 — 控制推理速度。优先级: sage_attn > flash_attn > sdpa > eager
+      #    auto       自动选择最佳可用机制
+      #    sage_attn  最快; 安装: uv pip install sageattention (需要 CUDA)
+      #    flash_attn 快速; 安装: uv pip install flash-attn
+      #    sdpa       PyTorch 内置 (无需安装)
+      #    eager      标准回退 (最慢)
+      attention: 'auto'
+      temperature: 1.0             # 采样温度; 越高越有表现力和变化
+      top_k: 20                    # top-k 采样; 越低输出越集中
+      top_p: 0.80                  # 核采样概率阈值
+      max_new_tokens: 2048         # 生成的最大 codec token 数 (1.7B 模型约 30s 音频)
+      repetition_penalty: 1.05     # 重复惩罚; 1.0 为禁用
+      seed: -1                     # 随机种子; -1 为每次随机
     openai_tts: # OpenAI 兼容的 TTS（语音合成）接口配置
       # 如果提供了这些设置，将覆盖 openai_tts.py 文件中的默认值
       model: 'kokoro' # 服务器预期使用的模型名称（例如 'tts-1'，'kokoro'）

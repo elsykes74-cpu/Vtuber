@@ -427,15 +427,15 @@ character_config:
       model_size: '1.7B'           # '0.6B' (faster, lower VRAM) or '1.7B' (higher capacity); VoiceDesign only supports 1.7B
       model_path: ''               # optional: local directory path; overrides model_type+model_size if set
       language: 'english'          # english, spanish, french, german, japanese, korean, chinese, portuguese, russian, italian
-      # --- voice_clone (model: *-Base) ---
-      # ref_audio: ''              # path to reference wav file (3-10s recommended; 5-15s for best quality); required for voice_clone
-      ref_text: ''                 # transcript of ref_audio for ICL mode; leave empty to use x_vector_only_mode
-      x_vector_only_mode: true     # true = speaker embedding only (no ref_text needed); false = ICL (ref_text required, higher fidelity)
-      # --- voice_design / custom_voice ---
+      # --- For model_type: 'voice_clone' ---
+      ref_audio: ''                                   # path to reference wav file (3-10s recommended; 5-15s for best quality); required for voice_clone
+      ref_text: ''                                    # transcript of ref_audio for ICL mode; leave empty to use x_vector_only_mode
+      x_vector_only_mode: true                        # true = speaker embedding only (no ref_text needed); false = ICL (ref_text required, higher fidelity)
+      # --- For model_type: 'custom_voice' ---
+      speaker: 'serena'                               # predefined speaker name: serena, vivian, ryan, aiden, ono_anna, sohee
+      # --- For model_type: 'custom_voice, voice_design' ---
       instruct: 'A warm and expressive female voice'  # voice_design: natural-language style description; custom_voice: optional style modifier (leave empty for default)
-      # --- custom_voice (model: *-CustomVoice) ---
-      speaker: 'serena'            # predefined speaker name: serena, vivian, ryan, aiden, ono_anna, sohee
-      # --- generation parameters ---
+      # --- Generation parameters ---
       device: 'cuda'               # 'cuda' (any GPU, recommended), 'cuda:0'/'cuda:1'/... (specific GPU by index), or 'cpu'
       # Attention mechanism — controls inference speed. Priority: sage_attn > flash_attn > sdpa > eager
       #   auto       auto-selects best available
