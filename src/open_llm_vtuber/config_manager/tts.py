@@ -705,6 +705,28 @@ class Qwen3TTSConfig(I18nMixin):
     repetition_penalty: float = Field(1.05, alias="repetition_penalty")
     seed: int = Field(-1, alias="seed")
 
+    @model_validator(mode="after")
+    def check_qwen3_tts_config(self) -> "Qwen3TTSConfig":
+        if self.model_type == "voice_design" and self.model_size != "1.7B":
+            raise ValueError(
+                "voice_design mode only supports model_size '1.7B', not '0.6B'"
+            )
+        if self.model_type == "custom_voice" and not self.speaker:
+            raise ValueError(
+                "custom_voice mode requires a non-empty 'speaker' value "
+                "(e.g. serena, vivian, ryan, aiden, ono_anna, sohee)"
+            )
+        if (
+            self.model_type == "voice_clone"
+            and self.x_vector_only_mode is False
+            and not self.ref_text
+        ):
+            raise ValueError(
+                "ICL mode (x_vector_only_mode=false) requires 'ref_text' "
+                "(transcript of the reference audio)"
+            )
+        return self
+
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "model_type": Description(
             en="Mode: voice_clone (Base model), voice_design (VoiceDesign model), custom_voice (CustomVoice model)",

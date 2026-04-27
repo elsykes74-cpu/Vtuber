@@ -423,12 +423,12 @@ character_config:
       #   voice_design + 1.7B → Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign
       #   custom_voice + 0.6B → Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice
       #   custom_voice + 1.7B → Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice
-      model_type: 'voice_clone'    # 'voice_clone' | 'voice_design' | 'custom_voice'
+      model_type: 'custom_voice'   # 'custom_voice' (ready to run with default speaker) | 'voice_clone' (requires ref_audio) | 'voice_design'
       model_size: '1.7B'           # '0.6B' (faster, lower VRAM) or '1.7B' (higher capacity); VoiceDesign only supports 1.7B
       model_path: ''               # optional: local directory path; overrides model_type+model_size if set
       language: 'english'          # english, spanish, french, german, japanese, korean, chinese, portuguese, russian, italian
       # --- voice_clone (model: *-Base) ---
-      ref_audio: ''                # path to reference wav file (3-10s recommended; 5-15s for best quality)
+      # ref_audio: ''              # path to reference wav file (3-10s recommended; 5-15s for best quality); required for voice_clone
       ref_text: ''                 # transcript of ref_audio for ICL mode; leave empty to use x_vector_only_mode
       x_vector_only_mode: true     # true = speaker embedding only (no ref_text needed); false = ICL (ref_text required, higher fidelity)
       # --- voice_design (model: *-VoiceDesign) ---
