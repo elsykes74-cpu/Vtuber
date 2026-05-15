@@ -4,6 +4,7 @@ endpoints for language generation.
 """
 
 from typing import AsyncIterator, List, Dict, Any
+import httpx
 from openai import (
     AsyncStream,
     AsyncOpenAI,
@@ -50,6 +51,9 @@ class AsyncLLM(StatelessLLMInterface):
             organization=organization_id,
             project=project_id,
             api_key=llm_api_key,
+            http_client=httpx.AsyncClient(
+                transport=httpx.AsyncHTTPTransport(retries=1),
+            ),
         )
         self.support_tools = True
 
