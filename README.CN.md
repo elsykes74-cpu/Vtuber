@@ -1,4 +1,55 @@
+**该分支使用说明：**
 
+如果你找到了该分支，***恭喜你***，你也许可以绕过许多的坑。
+
+首先是主分支的live2d原版的表情bug已修复（model_dict.json），
+
+在此之上我把mao_pro角色的表情全部提取并在expressions制作了对应的.json，拥有了更多的表情。
+
+目前参考情感的语种识别仅支持中文、日文，还没做英文的适配。
+
+**conf.yaml-gpt_sovits基础配置说明：**
+
+安装后请尝试把conf.yaml里修改parallel_infer: 'True'，如果无法使用再使用false。
+
+text_split_method可以配置为'cut5'，但我没测试会怎么样。
+
+如果你无法使用llama_cpp_llm的配置，也可以使用openai_compatible_llm来连接到llama.cpp。
+
+**情感gpt_sovits配置教程：**
+请在你的GPT-SoVITS项目文件夹下建立一个专门放情感分类的文件夹，例如："C:\GPT-SoVITS\Emotional_classification"，
+
+然后在Emotional_classification建立多个不同情感的文件夹（英文）
+
+<img width="579" height="406" alt="image" src="https://github.com/user-attachments/assets/313e5e30-394b-43cf-a767-18fb8500f678" />
+
+只要把对应情感的参考音频放到文件夹里，并且***参考音频的文件名必须是该音频的参考文本***。（目前仅支持中文与日文）
+
+<img width="677" height="406" alt="image" src="https://github.com/user-attachments/assets/b239908c-8dca-4017-98cc-bb3191c61f23" />
+
+然后conf.yaml配置emotion_base_dir为你的情感分类的文件夹（Emotional_classification，也可以是别的名称），
+
+emotional_tag配置为你的Emotional_classification里全部子文件夹名称，例子：
+
+emotional_tag: 'doubt,excited,expect,faintness,fear,firm,gentle,gratitude,happy,normal,scold,shy,surprise'
+
+之后你就可以开始聊天了。
+
+**一些简单的逻辑与解决方案：**
+gpt_sovits配置：
+
+1.情感模式出现错误会退回默认参考模式，并使用prompt_lang参考音频的语种指示。
+
+2.情感模式正常运行的情况下会忽略prompt_lang、prompt_text、ref_audio_path
+
+3.部分50系显卡可能无法使用parallel_infer: 'True'并行模式，请使用parallel_infer: 'false'
+
+4.你可以考虑调整top_k来让音色更符合参考音频。
+
+5.如果你无法使用自带的llama_cpp_llm功能，请在openai_compatible_llm配置你的llama.cpp。
+
+
+------------------------------------------------------------------
 ![](./assets/banner.cn.jpg)
 
 <h1 align="center">Open-LLM-VTuber</h1>

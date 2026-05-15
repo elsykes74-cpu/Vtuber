@@ -87,6 +87,13 @@ class TTSFactory:
                 batch_size=kwargs.get("batch_size"),
                 media_type=kwargs.get("media_type"),
                 streaming_mode=kwargs.get("streaming_mode"),
+                parallel_infer=kwargs.get("parallel_infer", "true"),
+                clean_mode=kwargs.get("clean_mode", "precise"),
+                custom_regex=kwargs.get("custom_regex", ""),
+                speed_factor=kwargs.get("speed_factor", "1.0"),
+                top_k=kwargs.get("top_k", "20"),
+                emotional_tag=kwargs.get("emotional_tag", ""),
+                emotion_base_dir=kwargs.get("emotion_base_dir", ""),
             )
         elif engine_type == "siliconflow_tts":
             from .siliconflow_tts import SiliconFlowTTS

@@ -14,6 +14,7 @@ system_config:
     # think_tag_prompt: 'think_tag_prompt'
     # live_prompt: 'live_prompt'
     # When using group conversation, this prompt will be added to the memory of each AI participant.
+    # Global prompts must also be placed in live2d_expression_prompt, not in deprecated files like concise_style_prompt.txt.
     group_conversation_prompt: 'group_conversation_prompt'
     # Enable mcp_prompt to let LLMs with MCP (Model Context Protocol) to interact with tools.
     # Please note that Agent will decide whether to use this prompt or not.
@@ -103,7 +104,8 @@ character_config:
         temperature: 1.0 # value between 0 to 2
         interrupt_method: 'user'
 
-      # OpenAI Compatible inference backend
+      # OpenAI compatible inference backend, llama.cpp configuration
+      # In the case of llama.cpp, the model and key can be left blank.
       openai_compatible_llm:
         base_url: 'http://localhost:11434/v1'
         llm_api_key: 'somethingelse'
@@ -122,6 +124,7 @@ character_config:
         llm_api_key: 'YOUR API KEY HERE'
         model: 'claude-3-haiku-20240307'
 
+      #This is generally not feasible; you may need "OpenAI compatible inference backend, llama.cpp configuration"
       llama_cpp_llm:
         model_path: '<path-to-gguf-model-file>'
         verbose: False
@@ -345,15 +348,26 @@ character_config:
 
     gpt_sovits_tts:
       # put ref audio to root path of GPT-Sovits, or set the path here
-      api_url: 'http://127.0.0.1:9880/tts'
-      text_lang: 'zh'
-      ref_audio_path: ''
-      prompt_lang: 'zh'
-      prompt_text: ''
-      text_split_method: 'cut5'
-      batch_size: '1'
-      media_type: 'wav'
-      streaming_mode: 'false'
+      # Default reference mode: Even if you use sentiment pattern, you should still specify the 'default reference' to increase redundancy.
+      api_url: 'http://127.0.0.1:9880/tts' # API URL
+      text_lang: 'en' # Text language used by the AI
+      ref_audio_path: '' # Path to the reference audio (required)
+      prompt_lang: 'en' # Language of the reference audio prompt text (required).If the 'emotional mode' is normal, it will ignore the automatic recognition of multiple languages. If the 'emotional mode' is abnormal, it will revert to the default mode.
+      prompt_text: '' # Optional text of the reference audio prompt text
+
+      # Emotion mode. Fill this in if needed; leave it blank to use the default fixed reference if not.
+      emotional_tag: ''    # Please fill in all your AI emotions here.
+      #Example：emotional_tag: 'doubt,excited,expect,faintness,fear,firm,gentle,gratitude,happy,normal,scold,shy,surprise'
+      emotion_base_dir: ''              # Please fill in the absolute path; otherwise, the directory cannot be traversed.
+      #Example：emotion_base_dir: 'C:\GPT-SoVITS\Emotional_classification'
+
+      text_split_method: 'cut0' # Text segmentation method: The official default is cut5. If problems occur, you can change it to cut0.
+      batch_size: '2' # Batch size
+      media_type: 'wav' # Media type
+      streaming_mode: 'false' # Returns the streaming response
+      parallel_infer: 'false' # Parallel inference switch, for situations where parallel inference cannot be used
+      speed_factor: '1.0' # Controls the synthesized sound speed.
+      top_k: '30' # Highest k-sampling, for adjusting timbre fit.
 
     fish_api_tts:
       # The API key for the Fish TTS API.

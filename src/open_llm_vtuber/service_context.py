@@ -431,7 +431,10 @@ class ServiceContext:
         else:
             logger.info("Translation already initialized with the same config.")
 
-    # ==== utils
+
+
+    
+
 
     async def construct_system_prompt(self, persona_prompt: str) -> str:
         """
@@ -458,7 +461,11 @@ class ServiceContext:
                 prompt_content = prompt_content.replace(
                     "[<insert_emomap_keys>]", self.live2d_model.emo_str
                 )
-
+            # Added: Replaced TTS sentiment tag placeholders
+            prompt_content = prompt_content.replace(
+                "[<insert_tts_emotions>]",
+                self._get_tts_emotion_str()
+            )
             if prompt_name == "mcp_prompt":
                 continue
 
@@ -468,6 +475,22 @@ class ServiceContext:
         logger.debug(persona_prompt)
 
         return persona_prompt
+
+    # ==== utils
+    def _get_tts_emotion_str(self) -> str:
+        logger.debug(f"[TTS情感] tts_engine={self.tts_engine}, type={type(self.tts_engine)}")
+        if self.tts_engine:
+            logger.debug(f"[TTS情感] has available_emotions={hasattr(self.tts_engine, 'available_emotions')}")
+            if hasattr(self.tts_engine, "available_emotions"):
+                logger.debug(f"[TTS情感] available_emotions={self.tts_engine.available_emotions}")
+        if (
+            self.tts_engine
+            and hasattr(self.tts_engine, "available_emotions")
+            and self.tts_engine.available_emotions
+        ):
+            emotions = self.tts_engine.available_emotions
+            return ", ".join(f"<{e}>" for e in emotions)
+        return ""
 
     async def handle_config_switch(
         self,
@@ -557,6 +580,7 @@ class ServiceContext:
                 )
             )
             raise e
+
 
 
 def deep_merge(dict1, dict2):

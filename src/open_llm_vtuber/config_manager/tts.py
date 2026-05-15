@@ -288,6 +288,13 @@ class GPTSoVITSConfig(I18nMixin):
     batch_size: str = Field(..., alias="batch_size")
     media_type: str = Field(..., alias="media_type")
     streaming_mode: str = Field(..., alias="streaming_mode")
+    parallel_infer: str = Field("true", alias="parallel_infer")
+    clean_mode: str = Field("precise", alias="clean_mode")
+    custom_regex: str = Field("", alias="custom_regex")
+    speed_factor: str = Field("1.0", alias="speed_factor")
+    top_k: str = Field("20", alias="top_k")
+    emotional_tag: str = Field("", alias="emotional_tag")
+    emotion_base_dir: str = Field("", alias="emotion_base_dir")
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "api_url": Description(
@@ -305,6 +312,17 @@ class GPTSoVITSConfig(I18nMixin):
         "batch_size": Description(en="Batch size for processing", zh="处理批次大小"),
         "media_type": Description(en="Output media type", zh="输出媒体类型"),
         "streaming_mode": Description(en="Enable streaming mode", zh="启用流式模式"),
+        "parallel_infer": Description(en="Enable parallel inference", zh="启用并行推理"),
+        "clean_mode": Description(en="Text cleaning mode", zh="文本清洗模式"),
+        "custom_regex": Description(en="Custom regex for cleaning", zh="自定义清洗正则"),
+        "speed_factor": Description(en="Speech speed factor", zh="语速控制"),
+        "top_k": Description(en="Top-k sampling", zh="最高k抽样"),
+        "emotional_tag": Description(
+            en="Comma-separated list of available TTS emotions", zh="可用TTS情感列表，逗号分隔"
+        ),
+        "emotion_base_dir": Description(
+            en="Base directory containing emotions/ subdirectory", zh="情感音频根目录"
+        ),
     }
 
 

@@ -1,3 +1,54 @@
+**ブランチ使用手順:**
+
+このブランチを見つけたなら、***おめでとうございます***。多くの落とし穴を回避できるかもしれません。
+
+まず、メインブランチのオリジナルLive2Dバージョンにあった表現バグが修正されました（model_dict.json）。
+
+さらに、mao_proキャラクターのすべての表現を抽出し、対応する.jsonファイルをexpressionsフォルダに作成しました。これにより、さらに多くの表現が利用可能になりました。
+
+現在、参照感情の言語認識は中国語と日本語のみをサポートしています。英語への対応はまだ実装されていません。
+
+**conf.yaml-gpt_sovits 基本設定手順:**
+
+インストール後、conf.yamlのparallel_infer: 'True' を変更してみてください。うまくいかない場合は、false に変更してみてください。
+
+text_split_methodは'cut5'に設定できますが、動作はテストしていません。
+
+
+llama_cpp_llm の設定が使用できない場合は、openai_compatible_llm を使用して llama.cpp に接続することもできます。
+
+**GPT-SoVITS 感情分類設定チュートリアル:** GPT-SoVITS プロジェクトフォルダ内に、感情分類専用のフォルダを作成してください。例: "C:\GPT-SoVITS\Emotional_classification"。
+
+次に、Emotional_classification フォルダ内に、異なる感情ごとに複数のフォルダを作成します (英語)。
+
+<img width="579" height="406" alt="image" src="https://github.com/user-attachments/assets/313e5e30-394b-43cf-a767-18fb8500f678" />
+
+対応する感情の参照音声ファイルをフォルダに配置してください。***参照音声ファイルのファイル名は、その音声ファイルの参照テキストと同じである必要があります***。 （現在、中国語と日本語のみ対応）
+
+<img width="677" height="406" alt="image" src="https://github.com/user-attachments/assets/b239908c-8dca-4017-98cc-bb3191c61f23" />
+
+次に、`conf.yaml` ファイルの `emotion_base_dir` を、感情カテゴリフォルダ（`Emotional_classification`、または任意の名前）に設定してください。
+
+`emotional_tag` を設定して、`Emotional_classification` フォルダ内のすべてのサブフォルダ名を含めるようにしてください。例：
+
+`emotional_tag: 'doubt,excited,expect,faintness,fear,firm,gentle,gratitude,happy,normal,scold,shy,surprise'`
+
+設定後、チャットを開始できます。
+
+
+**簡単なロジックと解決策:**
+gpt_sovits の設定:
+
+1. 感情モードでエラーが発生した場合、デフォルトの参照モードに戻り、参照音声の言語インジケータである prompt_lang を使用します。
+
+2. 感情モードが正常に動作している場合、prompt_lang、prompt_text、ref_audio_path は無視されます。
+
+3. 一部の 50 シリーズのグラフィックカードでは、parallel_infer: 'True' の並列モードが使用できない場合があります。その場合は parallel_infer: 'false' を使用してください。
+
+4. top_k を調整することで、音色を参照音声により近づけることができます。
+
+5. 組み込みの llama_cpp_llm 関数を使用できない場合は、openai_compatible_llm で llama.cpp を設定してください。
+
 ![](./assets/banner.jpg)
 
 <h1 align="center">Open-LLM-VTuber</h1>

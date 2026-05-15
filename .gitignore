@@ -76,3 +76,4 @@ private/
 mcp_servers.json
 
 .vscode/
+/.vs

@@ -1,3 +1,52 @@
+**브랜치 사용 안내:**
+
+이 브랜치를 찾으셨다면 ***축하합니다***. 덕분에 여러 가지 문제점을 피할 수 있을 것입니다.
+
+먼저, 메인 브랜치의 기존 Live2D 버전에서 발생했던 표현 관련 버그가 수정되었습니다(model_dict.json 파일).
+
+또한, mao_pro 문자에 대한 모든 표현을 추출하여 expressions 폴더에 해당 .json 파일을 생성함으로써 더욱 다양한 표현을 제공하고 있습니다.
+
+현재 참조 감정 표현에 대한 언어 인식은 중국어와 일본어만 지원하며, 영어는 아직 구현되지 않았습니다.
+
+**conf.yaml-gpt_sovits 기본 설정 안내:**
+
+설치 후 conf.yaml 파일에서 parallel_infer: 'True'로 설정해 보세요. 만약 작동하지 않으면 false로 설정해 보세요.
+
+text_split_method는 'cut5'로 설정할 수 있지만, 어떤 결과가 나오는지는 테스트하지 않았습니다.
+
+llama_cpp_llm 설정을 사용할 수 없는 경우 openai_compatible_llm을 사용하여 llama.cpp에 연결할 수도 있습니다.
+
+**GPT-SoVITS 감정 분류 설정 튜토리얼:** GPT-SoVITS 프로젝트 폴더 내에 감정 분류 전용 폴더를 생성하세요. 예를 들어, "C:\GPT-SoVITS\Emotional_classification"과 같이 생성합니다.
+
+그런 다음, Emotional_classification 폴더 내에 각기 다른 감정에 대한 하위 폴더를 생성합니다(이름은 영문).
+
+<img width="579" height="406" alt="image" src="https://github.com/user-attachments/assets/313e5e30-394b-43cf-a767-18fb8500f678" />
+
+해당 감정에 대한 참조 오디오 파일을 해당 폴더에 넣으세요. ***참조 오디오 파일의 파일 이름은 해당 오디오의 참조 텍스트여야 합니다.*** (현재 중국어와 일본어만 지원됩니다.)
+
+<img width="677" height="406" alt="image" src="https://github.com/user-attachments/assets/b239908c-8dca-4017-98cc-bb3191c61f23" />
+
+그런 다음, `conf.yaml` 파일에서 `emotion_base_dir`을 감정 분류 폴더(`Emotional_classification` 또는 다른 이름)로 설정하세요.
+
+`emotional_tag`에는 `Emotional_classification` 폴더 내의 모든 하위 폴더 이름을 포함하도록 설정하세요. 예시:
+
+`emotional_tag: 'doubt,excited,expect,faintness,fear,firm,gentle,gratitude,happy,normal,scold,shy,surprise'`
+
+설정이 완료되면 채팅을 시작할 수 있습니다.
+
+**간단한 논리 및 해결 방법:**
+gpt_sovits 설정:
+
+1. 감정 모드에서 오류가 발생하면 기본 참조 모드로 되돌아가 참조 오디오의 언어 표시기인 prompt_lang을 사용합니다.
+
+2. 감정 모드가 정상적으로 실행 중일 때는 prompt_lang, prompt_text, ref_audio_path가 무시됩니다.
+
+3. 일부 50 시리즈 그래픽 카드는 parallel_infer: 'True' 병렬 모드를 사용하지 못할 수 있습니다. parallel_infer: 'false'를 사용하십시오.
+
+4. 음색이 참조 오디오와 더 일관되도록 top_k 값을 조정하는 것을 고려해 볼 수 있습니다.
+
+5. 내장된 llama_cpp_llm 함수를 사용할 수 없는 경우, llama.cpp 파일을 openai_compatible_llm으로 설정하십시오.
+
 ![](./assets/banner.kr.jpg)
 
 <h1 align="center">Open-LLM-VTuber</h1>

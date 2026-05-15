@@ -99,6 +99,7 @@ def remove_special_characters(text: str) -> str:
             or category.startswith("N")
             or category.startswith("P")
             or char.isspace()
+            or char in "<>"  # 保留情感标签的尖括号 Angle brackets that retain sentiment labels
         )
 
     filtered_text = "".join(char for char in normalized_text if is_valid_char(char))

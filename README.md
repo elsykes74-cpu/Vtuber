@@ -1,3 +1,54 @@
+[翻译该文档](./README.CN.md)
+**Branch Usage Instructions:**
+
+If you've found this branch, ***congratulations***, you might be able to avoid many pitfalls.
+
+First, the expression bug in the original Live2D version of the main branch has been fixed (model_dict.json).
+
+Furthermore, I've extracted all the expressions for the mao_pro character and created corresponding .json files in expressions, providing even more expressions.
+
+Currently, the language recognition for the reference emotions only supports Chinese and Japanese; English adaptation hasn't been implemented yet.
+
+**conf.yaml-gpt_sovits Basic Configuration Instructions:**
+
+After installation, please try modifying parallel_infer: 'True' in conf.yaml. If that doesn't work, try using false.
+
+text_split_method can be configured as 'cut5', but I haven't tested what happens.
+
+If you cannot use the llama_cpp_llm configuration, you can also use openai_compatible_llm to connect to llama.cpp.
+
+**GPT-SoVITS Emotional Classification Configuration Tutorial:** Please create a dedicated folder for emotion classification within your GPT-SoVITS project folder, for example: "C:\GPT-SoVITS\Emotional_classification".
+
+Then, create multiple folders for different emotions within the Emotional_classification folder (in English).
+
+<img width="579" height="406" alt="image" src="https://github.com/user-attachments/assets/313e5e30-394b-43cf-a767-18fb8500f678" />
+
+Simply place the reference audio for the corresponding emotion into the folder, and ***the filename of the reference audio must be the reference text for that audio***. (Currently only Chinese and Japanese are supported)
+
+<img width="677" height="406" alt="image" src="https://github.com/user-attachments/assets/b239908c-8dca-4017-98cc-bb3191c61f23" />
+
+Then, configure `emotion_base_dir` in `conf.yaml` to your emotion category folder (`Emotional_classification`, or any other name).
+
+Configure `emotional_tag` to include all subfolder names within your `Emotional_classification` folder. Example:
+
+`emotional_tag: 'doubt,excited,expect,faintness,fear,firm,gentle,gratitude,happy,normal,scold,shy,surprise'`
+
+After that, you can start chatting.
+
+**Some simple logic and solutions:**
+gpt_sovits configuration:
+
+1. If an error occurs in emotion mode, it will revert to the default reference mode and use the language indicator of the reference audio, prompt_lang.
+
+2. If emotion mode is running normally, prompt_lang, prompt_text, and ref_audio_path will be ignored.
+
+3. Some 50-series graphics cards may not be able to use parallel_infer: 'True' parallel mode; please use parallel_infer: 'false'.
+
+4. You can consider adjusting top_k to make the timbre more consistent with the reference audio.
+
+5. If you cannot use the built-in llama_cpp_llm function, please configure your llama.cpp in openai_compatible_llm.
+
+
 ![](./assets/banner.jpg)
 
 <h1 align="center">Open-LLM-VTuber</h1>
