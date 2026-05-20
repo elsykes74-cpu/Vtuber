@@ -33,7 +33,7 @@ class TTSTaskManager:
         display_text: DisplayText,
         actions: Optional[Actions],
         live2d_model: Live2dModel,
-        tts_engine: TTSInterface,
+        tts_engine: TTSInterface | None,
         websocket_send: WebSocketSend,
     ) -> None:
         """
@@ -54,6 +54,18 @@ class TTSTaskManager:
             self._sequence_counter += 1
 
             # Start sender task if not running
+            if not self._sender_task or self._sender_task.done():
+                self._sender_task = asyncio.create_task(
+                    self._process_payload_queue(websocket_send)
+                )
+
+            await self._send_silent_payload(display_text, actions, current_sequence)
+            return
+
+        if tts_engine is None:
+            current_sequence = self._sequence_counter
+            self._sequence_counter += 1
+
             if not self._sender_task or self._sender_task.done():
                 self._sender_task = asyncio.create_task(
                     self._process_payload_queue(websocket_send)

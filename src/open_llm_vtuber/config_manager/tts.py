@@ -683,26 +683,30 @@ class CartesiaTTSConfig(I18nMixin):
 class TTSConfig(I18nMixin):
     """Configuration for Text-to-Speech."""
 
-    tts_model: Literal[
-        "azure_tts",
-        "bark_tts",
-        "edge_tts",
-        "cosyvoice_tts",
-        "cosyvoice2_tts",
-        "melo_tts",
-        "coqui_tts",
-        "x_tts",
-        "gpt_sovits_tts",
-        "fish_api_tts",
-        "sherpa_onnx_tts",
-        "siliconflow_tts",
-        "openai_tts",  # Add openai_tts here
-        "spark_tts",
-        "minimax_tts",
-        "elevenlabs_tts",
-        "cartesia_tts",
-        "piper_tts",
-    ] = Field(..., alias="tts_model")
+    tts_model: (
+        Literal[
+            "azure_tts",
+            "bark_tts",
+            "edge_tts",
+            "cosyvoice_tts",
+            "cosyvoice2_tts",
+            "melo_tts",
+            "coqui_tts",
+            "x_tts",
+            "gpt_sovits_tts",
+            "fish_api_tts",
+            "sherpa_onnx_tts",
+            "siliconflow_tts",
+            "openai_tts",
+            "spark_tts",
+            "minimax_tts",
+            "elevenlabs_tts",
+            "cartesia_tts",
+            "piper_tts",
+            "none",
+        ]
+        | None
+    ) = Field("edge_tts", alias="tts_model")
 
     azure_tts: Optional[AzureTTSConfig] = Field(None, alias="azure_tts")
     bark_tts: Optional[BarkTTSConfig] = Field(None, alias="bark_tts")

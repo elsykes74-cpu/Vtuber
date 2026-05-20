@@ -213,6 +213,11 @@ def init_webtool_routes(default_context_cache: ServiceContext) -> APIRouter:
 
                 logger.info(f"Received text for TTS: {text}")
 
+                if default_context_cache.tts_engine is None:
+                    logger.info("TTS is disabled, skipping audio generation")
+                    await websocket.send_json({"status": "complete"})
+                    continue
+
                 # Split text into sentences
                 sentences = [s.strip() for s in text.split(".") if s.strip()]
 
