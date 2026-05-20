@@ -275,7 +275,7 @@ character_config:
     tts_model: 'edge_tts'
     # text to speech model options:
     #   'azure_tts', 'pyttsx3_tts', 'edge_tts', 'bark_tts',
-    #   'cosyvoice_tts', 'melo_tts', 'coqui_tts', 'piper_tts',
+    #   'cosyvoice_tts', 'melo_tts', 'coqui_tts', 'piper_tts', 'qwen3_mlx_tts',
     #   'fish_api_tts', 'x_tts', 'gpt_sovits_tts', 'sherpa_onnx_tts'
     #   'minimax_tts', 'elevenlabs_tts', 'cartesia_tts'
 
@@ -305,6 +305,17 @@ character_config:
       volume: 1.0               # Volume level (0.0–1.0; 1.0 = normal)
       normalize_audio: true     # Whether to normalize audio (recommended: true, for more consistent volume)
       use_cuda: false           # Whether to use GPU acceleration (requires onnxruntime-gpu)
+
+    # qwen3_mlx_tts (Apple Silicon only): 8-bit MLX Qwen3-TTS. Set tts_model to qwen3_mlx_tts to use.
+    qwen3_mlx_tts:
+      # 0.6B = faster, lower VRAM; 1.7B = better quality. Both: *-0.6B-CustomVoice-8bit / *-1.7B-CustomVoice-8bit
+      model_id: 'mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-8bit'
+      # models_dir: ''           # Optional: path to project models/ (e.g. qwen3-tts-apple-silicon/models)
+      speaker: 'Vivian'         # CustomVoice speaker (Vivian, Serena, Uncle_Fu, Dylan, Eric, Ryan, Aiden, Ono_Anna, Sohee)
+      language: 'Auto'
+      instruct: ''              # Natural-language emotion/style (e.g. "Normal tone", "happy", "speak with excitement")
+      speed: 1.0
+      run_in_subprocess: true    # Isolate TTS in a subprocess so native crashes do not exit the server (recommended)
 
     cosyvoice_tts: # Cosy Voice TTS connects to the gradio webui
       # Check their documentation for deployment and the meaning of the following configurations
