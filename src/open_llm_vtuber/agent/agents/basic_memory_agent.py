@@ -271,7 +271,12 @@ class BasicMemoryAgent(AgentInterface):
                 )
 
         if user_content:
-            user_message = {"role": "user", "content": user_content}
+            # Use plain string when text-only for broader API compatibility
+            if len(user_content) == 1 and user_content[0]["type"] == "text":
+                content = user_content[0]["text"]
+            else:
+                content = user_content
+            user_message = {"role": "user", "content": content}
             messages.append(user_message)
 
             skip_memory = False
