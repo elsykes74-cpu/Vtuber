@@ -1,4 +1,6 @@
+import io
 import base64
+from pathlib import Path
 from pydub import AudioSegment
 from pydub.utils import make_chunks
 from ..agent.output_types import Actions
@@ -60,8 +62,12 @@ def prepare_audio_payload(
         }
 
     try:
-        audio = AudioSegment.from_file(audio_path)
-        audio_bytes = audio.export(format="wav").read()
+        source_format = Path(audio_path).suffix.lstrip(".") or None
+        with open(audio_path, "rb") as audio_file:
+            audio = AudioSegment.from_file(audio_file, format=source_format)
+        audio_buffer = io.BytesIO()
+        audio.export(audio_buffer, format="wav")
+        audio_bytes = audio_buffer.getvalue()
     except Exception as e:
         raise ValueError(
             f"Error loading or converting generated audio file to wav file '{audio_path}': {e}"

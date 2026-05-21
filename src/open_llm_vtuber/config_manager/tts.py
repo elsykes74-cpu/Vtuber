@@ -481,6 +481,27 @@ class OpenAITTSConfig(I18nMixin):
     }
 
 
+class QwenTTSConfig(OpenAITTSConfig):
+    """Configuration for Qwen TTS."""
+
+    model: Optional[str] = Field("qwen3-tts-en-single", alias="model")
+    voice: Optional[str] = Field("default", alias="voice")
+    api_key: Optional[str] = Field("not-needed", alias="api_key")
+    base_url: Optional[str] = Field("http://localhost:8000/v1", alias="base_url")
+    file_extension: Literal["mp3", "wav"] = Field("wav", alias="file_extension")
+    language: Optional[str] = Field(None, alias="language")
+
+    DESCRIPTIONS: ClassVar[Dict[str, Description]] = dict(OpenAITTSConfig.DESCRIPTIONS)
+    DESCRIPTIONS.update(
+        {
+            "language": Description(
+                en="Optional language forwarded to the qwen TTS server",
+                zh="转发给 Qwen TTS 服务器的可选语言参数",
+            ),
+        }
+    )
+
+
 class SparkTTSConfig(I18nMixin):
     """Configuration for Spark TTS."""
 
@@ -697,6 +718,7 @@ class TTSConfig(I18nMixin):
         "sherpa_onnx_tts",
         "siliconflow_tts",
         "openai_tts",  # Add openai_tts here
+        "qwen_tts",
         "spark_tts",
         "minimax_tts",
         "elevenlabs_tts",
@@ -721,6 +743,7 @@ class TTSConfig(I18nMixin):
         None, alias="siliconflow_tts"
     )
     openai_tts: Optional[OpenAITTSConfig] = Field(None, alias="openai_tts")
+    qwen_tts: Optional[QwenTTSConfig] = Field(None, alias="qwen_tts")
     spark_tts: Optional[SparkTTSConfig] = Field(None, alias="spark_tts")
     minimax_tts: Optional[MinimaxTTSConfig] = Field(None, alias="minimax_tts")
     elevenlabs_tts: ElevenLabsTTSConfig | None = Field(None, alias="elevenlabs_tts")
@@ -758,6 +781,7 @@ class TTSConfig(I18nMixin):
         "openai_tts": Description(
             en="Configuration for OpenAI-compatible TTS", zh="OpenAI 兼容 TTS 配置"
         ),
+        "qwen_tts": Description(en="Configuration for Qwen TTS", zh="Qwen TTS 配置"),
         "spark_tts": Description(en="Configuration for Spark TTS", zh="Spark TTS 配置"),
         "minimax_tts": Description(
             en="Configuration for Minimax TTS", zh="Minimax TTS 配置"
@@ -802,6 +826,8 @@ class TTSConfig(I18nMixin):
             values.siliconflow_tts.model_validate(values.siliconflow_tts.model_dump())
         elif tts_model == "openai_tts" and values.openai_tts is not None:
             values.openai_tts.model_validate(values.openai_tts.model_dump())
+        elif tts_model == "qwen_tts" and values.qwen_tts is not None:
+            values.qwen_tts.model_validate(values.qwen_tts.model_dump())
         elif tts_model == "spark_tts" and values.spark_tts is not None:
             values.spark_tts.model_validate(values.spark_tts.model_dump())
         elif tts_model == "minimax_tts" and values.minimax_tts is not None:
