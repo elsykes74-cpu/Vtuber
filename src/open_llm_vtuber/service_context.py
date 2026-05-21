@@ -49,7 +49,7 @@ class ServiceContext:
 
         self.live2d_model: Live2dModel = None
         self.asr_engine: ASRInterface = None
-        self.tts_engine: TTSInterface = None
+        self.tts_engine: TTSInterface | None = None
         self.agent_engine: AgentInterface = None
         # translate_engine can be none if translation is disabled
         self.vad_engine: VADInterface | None = None
@@ -333,6 +333,12 @@ class ServiceContext:
             logger.info("ASR already initialized with the same config.")
 
     def init_tts(self, tts_config: TTSConfig) -> None:
+        if tts_config.tts_model in (None, "none"):
+            logger.info("TTS is disabled.")
+            self.tts_engine = None
+            self.character_config.tts_config = tts_config
+            return
+
         if not self.tts_engine or (self.character_config.tts_config != tts_config):
             logger.info(f"Initializing TTS: {tts_config.tts_model}")
             self.tts_engine = TTSFactory.get_tts_engine(

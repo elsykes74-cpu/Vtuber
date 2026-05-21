@@ -274,10 +274,12 @@ character_config:
   tts_config:
     tts_model: 'edge_tts'
     # text to speech model options:
-    #   'azure_tts', 'pyttsx3_tts', 'edge_tts', 'bark_tts',
-    #   'cosyvoice_tts', 'melo_tts', 'coqui_tts', 'piper_tts',
-    #   'fish_api_tts', 'x_tts', 'gpt_sovits_tts', 'sherpa_onnx_tts'
-    #   'minimax_tts', 'elevenlabs_tts', 'cartesia_tts'
+    #   'none', 'azure_tts', 'bark_tts', 'edge_tts', 'cosyvoice_tts',
+    #   'cosyvoice2_tts', 'melo_tts', 'coqui_tts', 'x_tts',
+    #   'gpt_sovits_tts', 'fish_api_tts', 'sherpa_onnx_tts',
+    #   'siliconflow_tts', 'openai_tts', 'spark_tts', 'minimax_tts',
+    #   'elevenlabs_tts', 'cartesia_tts', 'piper_tts'
+    # Set to 'none' to disable TTS (text will still be displayed in the chat).
 
     azure_tts:
       api_key: 'azure-api-key'
