@@ -488,7 +488,7 @@ class WebSocketHandler:
     ) -> None:
         """Handle incoming audio data"""
         if self.client_input_muted.get(client_uid, False):
-            "Client input is muted, ignoring audio data"
+            logger.debug(f"Ignoring audio data received from muted client {client_uid}")
             return
         audio_data = data.get("audio", [])
         if audio_data:
@@ -503,7 +503,7 @@ class WebSocketHandler:
         """Handle incoming raw audio data for VAD processing"""
         context = self.client_contexts[client_uid]
         if self.client_input_muted.get(client_uid, False):
-            "Client input is muted, ignoring raw audio data"
+            logger.debug(f"Ignoring raw audio data received from muted client {client_uid}")
             return
         chunk = data.get("audio", [])
         if chunk:
@@ -629,18 +629,28 @@ class WebSocketHandler:
         self, websocket: WebSocket, client_uid: str, data: WSMessage
     ) -> None:
         """Handle setting input mute status for a client"""
-        muted = bool(data.get("muted", False))
+        muted_value = data.get("muted")
+
+        if type(muted_value) is not bool:
+            logger.warning(f"Invalid muted value received: {muted_value}")
+            await websocket.send_json(
+                {
+                    "type": "error", 
+                    "message": "Invalid value for muted. Expected boolean.",
+                }
+            )
+            return
+        
+        muted = muted_value
         self.client_input_muted[client_uid] = muted
 
         if muted:
             # If muting input, also clear any buffered audio data
             self.received_data_buffers[client_uid] = np.array([])
         
-        await websocket.send_text(
-            json.dumps(
-                {
-                    "type": "input-mute-state",
-                    "muted": muted,
-                }
-            )
+        await websocket.send_json(
+            {
+                "type": "input-mute-state",
+                "muted": muted,
+            }
         )
