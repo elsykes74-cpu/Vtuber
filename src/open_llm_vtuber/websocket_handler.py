@@ -56,6 +56,7 @@ class WSMessage(TypedDict, total=False):
     history_uid: Optional[str]
     file: Optional[str]
     display_text: Optional[dict]
+    muted: Optional[bool]
 
 
 class WebSocketHandler:
@@ -69,6 +70,7 @@ class WebSocketHandler:
         self.current_conversation_tasks: Dict[str, Optional[asyncio.Task]] = {}
         self.default_context_cache = default_context_cache
         self.received_data_buffers: Dict[str, np.ndarray] = {}
+        self.client_input_muted: Dict[str, bool] = {}
 
         # Message handlers mapping
         self._message_handlers = self._init_message_handlers()
@@ -95,6 +97,7 @@ class WebSocketHandler:
             "audio-play-start": self._handle_audio_play_start,
             "request-init-config": self._handle_init_config_request,
             "heartbeat": self._handle_heartbeat,
+            "set-input-mute": self._handle_set_input_mute,
         }
 
     async def handle_new_connection(
@@ -123,6 +126,8 @@ class WebSocketHandler:
                 websocket, client_uid, session_service_context
             )
 
+            self.client_input_muted[client_uid] = False
+
             logger.info(f"Connection established for client {client_uid}")
 
         except Exception as e:
@@ -142,6 +147,7 @@ class WebSocketHandler:
         self.client_connections[client_uid] = websocket
         self.client_contexts[client_uid] = session_service_context
         self.received_data_buffers[client_uid] = np.array([])
+        self.client_input_muted[client_uid] = False
 
         self.chat_group_manager.client_group_map[client_uid] = ""
         await self.send_group_update(websocket, client_uid)
@@ -301,6 +307,7 @@ class WebSocketHandler:
         self.client_connections.pop(client_uid, None)
         self.client_contexts.pop(client_uid, None)
         self.received_data_buffers.pop(client_uid, None)
+        self.client_input_muted.pop(client_uid, None)
         if client_uid in self.current_conversation_tasks:
             task = self.current_conversation_tasks[client_uid]
             if task and not task.done():
@@ -321,6 +328,7 @@ class WebSocketHandler:
         self.client_contexts.pop(client_uid, None)
         self.received_data_buffers.pop(client_uid, None)
         self.chat_group_manager.client_group_map.pop(client_uid, None)
+        self.client_input_muted.pop(client_uid, None)
 
         if client_uid in self.current_conversation_tasks:
             task = self.current_conversation_tasks[client_uid]
@@ -479,6 +487,9 @@ class WebSocketHandler:
         self, websocket: WebSocket, client_uid: str, data: WSMessage
     ) -> None:
         """Handle incoming audio data"""
+        if self.client_input_muted.get(client_uid, False):
+            logger.debug(f"Ignoring audio data received from muted client {client_uid}")
+            return
         audio_data = data.get("audio", [])
         if audio_data:
             self.received_data_buffers[client_uid] = np.append(
@@ -491,6 +502,9 @@ class WebSocketHandler:
     ) -> None:
         """Handle incoming raw audio data for VAD processing"""
         context = self.client_contexts[client_uid]
+        if self.client_input_muted.get(client_uid, False):
+            logger.debug(f"Ignoring raw audio data received from muted client {client_uid}")
+            return
         chunk = data.get("audio", [])
         if chunk:
             for audio_bytes in context.vad_engine.detect_speech(chunk):
@@ -610,3 +624,33 @@ class WebSocketHandler:
             await websocket.send_json({"type": "heartbeat-ack"})
         except Exception as e:
             logger.error(f"Error sending heartbeat acknowledgment: {e}")
+
+    async def _handle_set_input_mute(
+        self, websocket: WebSocket, client_uid: str, data: WSMessage
+    ) -> None:
+        """Handle setting input mute status for a client"""
+        muted_value = data.get("muted")
+
+        if type(muted_value) is not bool:
+            logger.warning(f"Invalid muted value received: {muted_value}")
+            await websocket.send_json(
+                {
+                    "type": "error", 
+                    "message": "Invalid value for muted. Expected boolean.",
+                }
+            )
+            return
+        
+        muted = muted_value
+        self.client_input_muted[client_uid] = muted
+
+        if muted:
+            # If muting input, also clear any buffered audio data
+            self.received_data_buffers[client_uid] = np.array([])
+        
+        await websocket.send_json(
+            {
+                "type": "input-mute-state",
+                "muted": muted,
+            }
+        )
