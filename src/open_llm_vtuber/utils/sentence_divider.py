@@ -187,9 +187,14 @@ def segment_text_by_regex(text: str) -> Tuple[List[str], str]:
     complete_sentences = []
     remaining_text = text.strip()
 
-    # Create pattern for matching sentences ending with any end punctuation
-    escaped_punctuations = [re.escape(p) for p in END_PUNCTUATIONS]
-    pattern = r"(.*?(?:[" + "|".join(escaped_punctuations) + r"]))"
+    # Create pattern for matching sentences ending with any end punctuation.
+    # Use a real alternation (?:a|b|...) rather than a character class [a|b|...]:
+    # inside a character class "|" is a literal pipe and multi-character
+    # punctuation like "..." collapses to a single ".". Longer punctuation is
+    # listed first so e.g. "..." matches before "." and is not split apart.
+    ordered_punctuations = sorted(END_PUNCTUATIONS, key=len, reverse=True)
+    escaped_punctuations = [re.escape(p) for p in ordered_punctuations]
+    pattern = r"(.*?(?:" + "|".join(escaped_punctuations) + r"))"
 
     while remaining_text:
         match = re.search(pattern, remaining_text)
