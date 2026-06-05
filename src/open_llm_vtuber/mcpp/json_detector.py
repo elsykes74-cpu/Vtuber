@@ -99,11 +99,20 @@ class StreamJSONDetector:
         """
         stack = 1
         i = start_idx + 1
+        in_string = False
+        escaped = False
 
         while i < len(self.buffer) and stack > 0:
-            if self.buffer[i] == "{":
+            char = self.buffer[i]
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = not in_string
+            elif not in_string and char == "{":
                 stack += 1
-            elif self.buffer[i] == "}":
+            elif not in_string and char == "}":
                 stack -= 1
             i += 1
 
