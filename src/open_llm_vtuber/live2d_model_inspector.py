@@ -159,8 +159,7 @@ class Live2DModelInspector:
                     duplicate_names.add(name)
                 names.add(name)
 
-            self._validate_model_dict_entry(entry, entry_issues, index)
-            inspected = self.inspect_model_entry(entry)
+            inspected = self.inspect_model_entry(entry, model_index=index)
             entry_issues.extend(
                 InspectionIssue(
                     severity=item["severity"],
@@ -206,11 +205,13 @@ class Live2DModelInspector:
             },
         )
 
-    def inspect_model_entry(self, model_info: dict[str, Any]) -> dict[str, Any]:
+    def inspect_model_entry(
+        self, model_info: dict[str, Any], model_index: int | None = None
+    ) -> dict[str, Any]:
         issues: list[InspectionIssue] = []
         resources: list[ResourceRef] = []
 
-        self._validate_model_dict_entry(model_info, issues, None)
+        self._validate_model_dict_entry(model_info, issues, model_index)
         model_url = str(model_info.get("url", "")).strip()
         model_path = self.resolve_live2d_path(model_url)
 
