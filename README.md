@@ -37,7 +37,7 @@ ENGLISH README | [中文 README](./README.CN.md) | [한국어 README](./README.K
 
 > :warning: This project is in its early stages and is currently under **active development**.
 
-> :warning: If you want to run the server remotely and access it on a different machine, such as running the server on your computer and access it on your phone, you will need to configure `https`, because the microphone on the front end will only launch in a secure context (a.k.a. https or localhost). See [MDN Web Doc](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia). Therefore, you should configure https with a reverse proxy to access the page on a remote machine (non-localhost).
+> :warning: If you want to run the server remotely and access it on a different machine, such as running the server on your computer and accessing it on your phone, you will need to configure `https`, because the microphone on the front end will only launch in a secure context (a.k.a. https or localhost). See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia). Therefore, you should configure https with a reverse proxy to access the page on a remote machine (non-localhost).
 
 
 
@@ -104,7 +104,7 @@ Please refer to the [Quick Start](https://open-llm-vtuber.github.io/docs/quick-s
 
 
 ## ☝ Update
-> :warning: `v1.0.0` has breaking changes and requires re-deployment. You *may* still update via the method below, but the `conf.yaml` file is incompatible and most of the dependencies needs to be reinstalled with `uv`. For those who came from versions before `v1.0.0`, I recommend deploy this project again with the [latest deployment guide](https://open-llm-vtuber.github.io/docs/quick-start).
+> :warning: `v1.0.0` has breaking changes and requires re-deployment. You *may* still update via the method below, but the `conf.yaml` file is incompatible and most of the dependencies need to be reinstalled with `uv`. For those who came from versions before `v1.0.0`, I recommend deploying this project again with the [latest deployment guide](https://open-llm-vtuber.github.io/docs/quick-start).
 
 Please use `uv run update.py` to update if you installed any versions later than `v1.0.0`.
 
@@ -116,7 +116,7 @@ However, models downloaded via ModelScope or Hugging Face may also be in `MODELS
 Review the installation guide for any extra tools you no longer need, such as `uv`, `ffmpeg`, or `deeplx`.  
 
 ## 🤗 Want to contribute?
-Checkout the [development guide](https://docs.llmvtuber.com/docs/development-guide/overview).
+Check out the [development guide](https://docs.llmvtuber.com/docs/development-guide/overview).
 
 
 # 🎉🎉🎉 Related Projects
@@ -141,7 +141,7 @@ Note: For commercial use, especially by medium or large-scale enterprises, the u
 
 
 ## Contributors
-Thanks our contributors and maintainers for making this project possible.
+Thanks to our contributors and maintainers for making this project possible.
 
 <a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=Open-LLM-VTuber/Open-LLM-VTuber" />
@@ -151,7 +151,6 @@ Thanks our contributors and maintainers for making this project possible.
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Open-LLM-VTuber/open-llm-vtuber&type=Date)](https://star-history.com/#Open-LLM-VTuber/open-llm-vtuber&Date)
-
 
 
 
