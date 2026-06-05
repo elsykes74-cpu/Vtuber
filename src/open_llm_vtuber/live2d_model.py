@@ -1,6 +1,7 @@
 import json
 import chardet
 from loguru import logger
+from .live2d_model_inspector import Live2DModelInspector
 
 # This class will only prepare the payload for the live2d model
 # the process of sending the payload should be done by the caller
@@ -192,3 +193,8 @@ class Live2dModel:
                 target_str = target_str[:start_index] + target_str[end_index:]
                 lower_str = lower_str[:start_index] + lower_str[end_index:]
         return target_str
+
+    def inspect_model(self) -> dict:
+        """Return a resource and configuration inspection report for this model."""
+        inspector = Live2DModelInspector(model_dict_path=self.model_dict_path)
+        return inspector.inspect_model_entry(self.model_info)
