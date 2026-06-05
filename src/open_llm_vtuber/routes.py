@@ -10,6 +10,7 @@ from loguru import logger
 from .service_context import ServiceContext
 from .websocket_handler import WebSocketHandler
 from .proxy_handler import ProxyHandler
+from .live2d_model_inspector import Live2DModelInspector
 
 
 def init_client_ws_route(default_context_cache: ServiceContext) -> APIRouter:
@@ -104,6 +105,7 @@ def init_webtool_routes(default_context_cache: ServiceContext) -> APIRouter:
 
         valid_characters = []
         supported_extensions = [".png", ".jpg", ".jpeg"]
+        inspector = Live2DModelInspector(live2d_models_dir=live2d_dir)
 
         for entry in os.scandir(live2d_dir):
             if entry.is_dir():
@@ -128,6 +130,7 @@ def init_webtool_routes(default_context_cache: ServiceContext) -> APIRouter:
                             "name": folder_name,
                             "avatar": avatar_file,
                             "model_path": model3_file,
+                            "inspection": inspector.inspect_model_file(model3_file),
                         }
                     )
         return JSONResponse(
