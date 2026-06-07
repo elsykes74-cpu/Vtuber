@@ -16,6 +16,7 @@ DEFAULT_MODEL_ROOT = Path("live2d-models")
 
 
 def _case_get(data: dict[str, Any], key: str, default: Any = None) -> Any:
+    """Return a value from a JSON object while ignoring key casing."""
     if key in data:
         return data[key]
     lower_key = key.lower()
@@ -26,6 +27,7 @@ def _case_get(data: dict[str, Any], key: str, default: Any = None) -> Any:
 
 
 def _resolve_model3_path(path: Path) -> Path:
+    """Resolve a file or single-model directory to one model3.json path."""
     if path.is_file():
         return path
 
@@ -42,6 +44,7 @@ def _resolve_model3_path(path: Path) -> Path:
 
 
 def _read_json(path: Path) -> dict[str, Any]:
+    """Read a JSON file and require the top-level value to be an object."""
     with path.open("r", encoding="utf-8") as handle:
         data = json.load(handle)
     if not isinstance(data, dict):
@@ -50,6 +53,7 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 
 def _relative_file_status(model_dir: Path, file_name: str | None) -> dict[str, Any]:
+    """Describe a model-relative file reference and whether it exists."""
     if not file_name:
         return {"file": "", "exists": False}
     file_path = model_dir / file_name
@@ -59,6 +63,7 @@ def _relative_file_status(model_dir: Path, file_name: str | None) -> dict[str, A
 def _extract_expressions(
     file_references: dict[str, Any], model_dir: Path
 ) -> list[dict[str, Any]]:
+    """Extract expression names and referenced files from FileReferences."""
     expressions = _case_get(file_references, "Expressions", [])
     if not isinstance(expressions, list):
         return []
@@ -82,6 +87,7 @@ def _extract_expressions(
 def _extract_motions(
     file_references: dict[str, Any], model_dir: Path
 ) -> dict[str, list[dict[str, Any]]]:
+    """Extract motion groups and referenced motion files from FileReferences."""
     motions = _case_get(file_references, "Motions", {})
     if not isinstance(motions, dict):
         return {}
@@ -100,6 +106,7 @@ def _extract_motions(
 
 
 def _extract_hit_areas(data: dict[str, Any]) -> list[dict[str, str]]:
+    """Extract Live2D hit area IDs and display names."""
     hit_areas = _case_get(data, "HitAreas", [])
     if not isinstance(hit_areas, list):
         return []
@@ -118,6 +125,7 @@ def _extract_hit_areas(data: dict[str, Any]) -> list[dict[str, str]]:
 
 
 def _suggest_model_url(model3_path: Path, model_root: Path) -> str:
+    """Build the public model URL expected by the web Live2D config."""
     try:
         relative = model3_path.resolve().relative_to(model_root.resolve())
     except ValueError:
@@ -126,6 +134,7 @@ def _suggest_model_url(model3_path: Path, model_root: Path) -> str:
 
 
 def _suggest_model_name(model3_path: Path, model_root: Path) -> str:
+    """Infer a model_dict name from the first folder under the model root."""
     try:
         relative = model3_path.resolve().relative_to(model_root.resolve())
     except ValueError:
@@ -137,6 +146,7 @@ def _suggest_model_name(model3_path: Path, model_root: Path) -> str:
 
 
 def _find_idle_group(motions: dict[str, list[dict[str, Any]]]) -> str | None:
+    """Choose the best candidate motion group for idle animation."""
     for preferred in ("idle", "Idle"):
         if preferred in motions:
             return preferred
@@ -152,6 +162,7 @@ def inspect_model(
     model_name: str | None,
     character_name: str | None,
 ) -> dict[str, Any]:
+    """Inspect one Live2D model and return metadata plus setup suggestions."""
     resolved_model3_path = _resolve_model3_path(model3_path)
     data = _read_json(resolved_model3_path)
     model_dir = resolved_model3_path.parent
@@ -197,6 +208,7 @@ def inspect_model(
 
 
 def _format_table(headers: list[str], rows: list[list[str]]) -> str:
+    """Render a compact markdown-style table for terminal output."""
     if not rows:
         return "_None found._"
 
@@ -216,6 +228,7 @@ def _format_table(headers: list[str], rows: list[list[str]]) -> str:
 
 
 def _format_text(summary: dict[str, Any]) -> str:
+    """Format an inspection summary as a human-readable text report."""
     expression_rows = [
         [
             str(expression["index"]),
@@ -273,6 +286,7 @@ def _format_text(summary: dict[str, Any]) -> str:
 
 
 def main() -> int:
+    """Parse CLI arguments and print either text or JSON inspection output."""
     parser = argparse.ArgumentParser(
         description="Inspect a Live2D *.model3.json file and print setup hints."
     )
