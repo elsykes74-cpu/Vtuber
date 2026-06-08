@@ -314,6 +314,21 @@ character_config:
       normalize_audio: true     # 是否归一化音频（推荐启用，使音量更稳定）
       use_cuda: false           # 是否使用 GPU 加速（需要安装 onnxruntime-gpu）
 
+    f5_tts:
+      # F5-TTS: 基于流匹配的语音克隆 TTS
+      # 安装: pip install f5-tts
+      # 参考: https://github.com/SWivid/F5-TTS
+      ref_audio: 'path/to/reference.wav'   # 用于声音克隆的参考音频文件路径
+      ref_text: ''                          # 参考音频的文字内容（留空则自动转录）
+      model: 'F5TTS_v1_Base'               # 模型: F5TTS_v1_Base, F5TTS_Base, E2TTS_Base
+      device: ''                            # 设备: cuda, cpu, mps, xpu（留空自动检测）
+      remove_silence: false                 # 是否移除生成音频中的静音部分
+      speed: 1.0                            # 语速倍数
+      cross_fade_duration: 0.15             # 音频块之间的交叉淡入淡出时长（秒）
+      nfe_step: 32                          # 函数评估次数（越高质量越好）
+      cfg_strength: 2.0                     # 无分类器引导强度
+      sway_sampling_coef: -1.0              # Sway采样系数（-1 禁用）
+
     cosyvoice_tts: # Cosy Voice TTS 连接到 gradio webui
       # 查看他们的文档以了解部署和以下配置的含义
       client_url: 'http://127.0.0.1:50000/' # CosyVoice gradio 演示 webui url

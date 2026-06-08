@@ -211,6 +211,21 @@ class TTSFactory:
                 normalize_audio=kwargs.get("normalize_audio"),
                 use_cuda=kwargs.get("use_cuda"),
             )
+        elif engine_type == "f5_tts":
+            from .f5_tts import TTSEngine as F5TTSEngine
+
+            return F5TTSEngine(
+                ref_audio=kwargs.get("ref_audio", ""),
+                ref_text=kwargs.get("ref_text", ""),
+                model=kwargs.get("model", "F5TTS_v1_Base"),
+                device=kwargs.get("device", ""),
+                remove_silence=kwargs.get("remove_silence", False),
+                speed=kwargs.get("speed", 1.0),
+                cross_fade_duration=kwargs.get("cross_fade_duration", 0.15),
+                nfe_step=kwargs.get("nfe_step", 32),
+                cfg_strength=kwargs.get("cfg_strength", 2.0),
+                sway_sampling_coef=kwargs.get("sway_sampling_coef", -1.0),
+            )
         else:
             raise ValueError(f"Unknown TTS engine type: {engine_type}")
 

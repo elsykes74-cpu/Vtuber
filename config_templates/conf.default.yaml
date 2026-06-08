@@ -278,6 +278,7 @@ character_config:
     #   'cosyvoice_tts', 'melo_tts', 'coqui_tts', 'piper_tts',
     #   'fish_api_tts', 'x_tts', 'gpt_sovits_tts', 'sherpa_onnx_tts'
     #   'minimax_tts', 'elevenlabs_tts', 'cartesia_tts'
+    #   'f5_tts'
 
     azure_tts:
       api_key: 'azure-api-key'
@@ -305,6 +306,21 @@ character_config:
       volume: 1.0               # Volume level (0.0–1.0; 1.0 = normal)
       normalize_audio: true     # Whether to normalize audio (recommended: true, for more consistent volume)
       use_cuda: false           # Whether to use GPU acceleration (requires onnxruntime-gpu)
+
+    f5_tts:
+      # F5-TTS: Flow matching based TTS with voice cloning
+      # Requires: pip install f5-tts
+      # See: https://github.com/SWivid/F5-TTS
+      ref_audio: 'path/to/reference.wav'   # Path to reference audio file for voice cloning
+      ref_text: ''                          # Transcription of reference audio (empty = auto-transcribe)
+      model: 'F5TTS_v1_Base'               # Model: F5TTS_v1_Base, F5TTS_Base, E2TTS_Base
+      device: ''                            # Device: cuda, cpu, mps, xpu (empty = auto-detect)
+      remove_silence: false                 # Remove silence from generated audio
+      speed: 1.0                            # Speech speed multiplier
+      cross_fade_duration: 0.15             # Cross-fade duration between chunks (seconds)
+      nfe_step: 32                          # Number of function evaluations (higher = better quality)
+      cfg_strength: 2.0                     # Classifier-free guidance strength
+      sway_sampling_coef: -1.0              # Sway sampling coefficient (-1 to disable)
 
     cosyvoice_tts: # Cosy Voice TTS connects to the gradio webui
       # Check their documentation for deployment and the meaning of the following configurations

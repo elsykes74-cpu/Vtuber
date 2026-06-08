@@ -680,6 +680,65 @@ class CartesiaTTSConfig(I18nMixin):
     }
 
 
+
+
+class F5TTSConfig(I18nMixin):
+    """Configuration for F5-TTS."""
+
+    ref_audio: str = Field(..., alias="ref_audio")
+    ref_text: str = Field("", alias="ref_text")
+    model: str = Field("F5TTS_v1_Base", alias="model")
+    device: str = Field("", alias="device")
+    remove_silence: bool = Field(False, alias="remove_silence")
+    speed: float = Field(1.0, alias="speed")
+    cross_fade_duration: float = Field(0.15, alias="cross_fade_duration")
+    nfe_step: int = Field(32, alias="nfe_step")
+    cfg_strength: float = Field(2.0, alias="cfg_strength")
+    sway_sampling_coef: float = Field(-1.0, alias="sway_sampling_coef")
+
+    DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
+        "ref_audio": Description(
+            en="Path to reference audio file for voice cloning",
+            zh="用于声音克隆的参考音频文件路径",
+        ),
+        "ref_text": Description(
+            en="Transcription of the reference audio (leave empty for auto-transcription)",
+            zh="参考音频的文字内容（留空则自动转录）",
+        ),
+        "model": Description(
+            en="Model name (F5TTS_v1_Base, F5TTS_Base, E2TTS_Base)",
+            zh="模型名称（F5TTS_v1_Base、F5TTS_Base、E2TTS_Base）",
+        ),
+        "device": Description(
+            en="Device to use (cuda, cpu, mps, xpu). Empty for auto-detect",
+            zh="使用的设备（cuda、cpu、mps、xpu）。留空自动检测",
+        ),
+        "remove_silence": Description(
+            en="Whether to remove silence from generated audio",
+            zh="是否移除生成音频中的静音部分",
+        ),
+        "speed": Description(
+            en="Speech speed multiplier (1.0 = normal)",
+            zh="语速倍数（1.0 = 正常）",
+        ),
+        "cross_fade_duration": Description(
+            en="Cross-fade duration in seconds between audio chunks",
+            zh="音频块之间的交叉淡入淡出时长（秒）",
+        ),
+        "nfe_step": Description(
+            en="Number of function evaluations (higher = better quality, slower)",
+            zh="函数评估次数（越高质量越好，速度越慢）",
+        ),
+        "cfg_strength": Description(
+            en="Classifier-free guidance strength",
+            zh="无分类器引导强度",
+        ),
+        "sway_sampling_coef": Description(
+            en="Sway sampling coefficient (-1 to disable)",
+            zh="Sway采样系数（-1 禁用）",
+        ),
+    }
+
 class TTSConfig(I18nMixin):
     """Configuration for Text-to-Speech."""
 
@@ -702,6 +761,7 @@ class TTSConfig(I18nMixin):
         "elevenlabs_tts",
         "cartesia_tts",
         "piper_tts",
+        "f5_tts",
     ] = Field(..., alias="tts_model")
 
     azure_tts: Optional[AzureTTSConfig] = Field(None, alias="azure_tts")
@@ -726,6 +786,7 @@ class TTSConfig(I18nMixin):
     elevenlabs_tts: ElevenLabsTTSConfig | None = Field(None, alias="elevenlabs_tts")
     cartesia_tts: CartesiaTTSConfig | None = Field(None, alias="cartesia_tts")
     piper_tts: Optional[PiperTTSConfig] = Field(None, alias="piper_tts")
+    f5_tts: Optional[F5TTSConfig] = Field(None, alias="f5_tts")
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "tts_model": Description(
@@ -769,6 +830,7 @@ class TTSConfig(I18nMixin):
             en="Configuration for Cartesia TTS", zh="Cartesia TTS 配置"
         ),
         "piper_tts": Description(en="Configuration for Piper TTS", zh="Piper TTS 配置"),
+        "f5_tts": Description(en="Configuration for F5-TTS", zh="F5-TTS 配置"),
     }
 
     @model_validator(mode="after")
@@ -813,4 +875,6 @@ class TTSConfig(I18nMixin):
 
         elif tts_model == "piper_tts" and values.piper_tts is not None:
             values.piper_tts.model_validate(values.piper_tts.model_dump())
+        elif tts_model == "f5_tts" and values.f5_tts is not None:
+            values.f5_tts.model_validate(values.f5_tts.model_dump())
         return values
