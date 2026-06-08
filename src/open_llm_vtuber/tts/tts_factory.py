@@ -1,11 +1,41 @@
+"""TTS engine factory for dynamic engine instantiation.
+
+Provides a factory pattern for creating TTS engine instances based on
+configuration-specified engine types.
+"""
+
 from typing import Type
 from .tts_interface import TTSInterface
 
 
 class TTSFactory:
+    """Factory for creating TTS engine instances by engine type name."""
+
     @staticmethod
-    def get_tts_engine(engine_type, **kwargs) -> Type[TTSInterface]:
+    def get_tts_engine(engine_type: str, **kwargs) -> Type[TTSInterface]:
+        """Instantiate and return a TTS engine based on the given engine type.
+
+        Args:
+            engine_type: The TTS engine identifier (e.g. 'azure_tts', 'f5_tts').
+            **kwargs: Engine-specific configuration parameters.
+
+        Returns:
+            An instance of the requested TTS engine.
+
+        Raises:
+            ValueError: If the engine type is not recognized.
+        """
         if engine_type == "azure_tts":
+            from .azure_tts import TTSEngine as AzureTTSEngine
+
+            return AzureTTSEngine(
+                kwargs.get("api_key"),
+                kwargs.get("region"),
+                kwargs.get("voice"),
+                kwargs.get("pitch"),
+                kwargs.get("rate"),
+            )
+if engine_type == "azure_tts":
             from .azure_tts import TTSEngine as AzureTTSEngine
 
             return AzureTTSEngine(
