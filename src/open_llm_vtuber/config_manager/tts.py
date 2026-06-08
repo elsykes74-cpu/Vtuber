@@ -680,8 +680,6 @@ class CartesiaTTSConfig(I18nMixin):
     }
 
 
-
-
 class F5TTSConfig(I18nMixin):
     """Configuration for F5-TTS."""
 
@@ -738,6 +736,7 @@ class F5TTSConfig(I18nMixin):
             zh="Sway采样系数（-1 禁用）",
         ),
     }
+
 
 class TTSConfig(I18nMixin):
     """Configuration for Text-to-Speech."""
