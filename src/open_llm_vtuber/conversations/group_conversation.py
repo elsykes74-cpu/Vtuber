@@ -129,7 +129,9 @@ async def process_group_conversation(
                     metadata=current_metadata,
                 )
             except Exception as e:
-                logger.error(f"Error in group member turn: {e}")
+                logger.opt(exception=True).error(
+                    f"Error in group member turn ({type(e).__name__}: {e})"
+                )
                 await handle_member_error(
                     broadcast_func, group_members, f"Error in conversation: {str(e)}"
                 )
@@ -140,7 +142,11 @@ async def process_group_conversation(
         )
         raise
     except Exception as e:
-        logger.error(f"Error in group conversation chain: {e}")
+        # Log type and traceback: some exceptions stringify to "" and the
+        # bare message made this branch undiagnosable (#384).
+        logger.opt(exception=True).error(
+            f"Error in group conversation chain ({type(e).__name__}: {e})"
+        )
         await handle_member_error(
             broadcast_func, group_members, f"Fatal error in conversation: {str(e)}"
         )
@@ -268,7 +274,7 @@ async def handle_group_member_turn(
     )
 
     if tts_manager.task_list:
-        await asyncio.gather(*tts_manager.task_list)
+        await tts_manager.wait_for_tasks()
         await current_ws_send(json.dumps({"type": "backend-synth-complete"}))
 
         broadcast_ctx = BroadcastContext(

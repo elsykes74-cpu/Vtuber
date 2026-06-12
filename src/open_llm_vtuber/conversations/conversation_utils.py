@@ -1,4 +1,3 @@
-import asyncio
 import re
 from typing import Optional, Union, Any, List, Dict
 import numpy as np
@@ -167,7 +166,7 @@ async def finalize_conversation_turn(
 ) -> None:
     """Finalize a conversation turn"""
     if tts_manager.task_list:
-        await asyncio.gather(*tts_manager.task_list)
+        await tts_manager.wait_for_tasks()
         await websocket_send(json.dumps({"type": "backend-synth-complete"}))
 
         response = await message_handler.wait_for_response(
