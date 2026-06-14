@@ -109,4 +109,4 @@ class TTSEngine(TTSInterface):
 
         except Exception as e:
             logger.error(f"F5-TTS failed to generate audio: {e}")
-            raise RuntimeError(f"Failed to generate audio with F5-TTS: {e}")
+            raise RuntimeError(f"Failed to generate audio with F5-TTS: {e}") from e
