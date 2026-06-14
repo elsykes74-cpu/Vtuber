@@ -35,16 +35,6 @@ class TTSFactory:
                 kwargs.get("pitch"),
                 kwargs.get("rate"),
             )
-if engine_type == "azure_tts":
-            from .azure_tts import TTSEngine as AzureTTSEngine
-
-            return AzureTTSEngine(
-                kwargs.get("api_key"),
-                kwargs.get("region"),
-                kwargs.get("voice"),
-                kwargs.get("pitch"),
-                kwargs.get("rate"),
-            )
         elif engine_type == "bark_tts":
             from .bark_tts import TTSEngine as BarkTTSEngine
 
