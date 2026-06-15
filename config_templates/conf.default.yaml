@@ -277,7 +277,7 @@ character_config:
     #   'azure_tts', 'pyttsx3_tts', 'edge_tts', 'bark_tts',
     #   'cosyvoice_tts', 'melo_tts', 'coqui_tts', 'piper_tts',
     #   'fish_api_tts', 'x_tts', 'gpt_sovits_tts', 'sherpa_onnx_tts'
-    #   'minimax_tts', 'elevenlabs_tts', 'cartesia_tts'
+    #   'minimax_tts', 'elevenlabs_tts', 'cartesia_tts', 'vllm_omni_tts'
 
     azure_tts:
       api_key: 'azure-api-key'
@@ -452,6 +452,16 @@ character_config:
       emotion: 'neutral' # Emotional guidance
       volume: 1.0 # Voice volume (0.5 to 2.0)
       speed: 1.0 # Voice speed (0.6 to 1.5)
+
+    vllm_omni_tts: # vLLM-Omni TTS via OpenAI-compatible API (requires vllm-omni server)
+      base_url: 'http://localhost:8091/v1'
+      model: 'qwen3-tts' # Model family for sample rate detection
+      voice: '' # Speaker name (e.g. 'Chelsie')
+      language: 'Auto' # Language: Auto, Chinese, English, Japanese, Korean, etc.
+      task_type: 'Base' # Base, CustomVoice, or VoiceDesign
+      ref_audio: '' # Path to reference audio for CustomVoice
+      ref_text: '' # Transcript of reference audio for CustomVoice
+      instructions: '' # Voice description for VoiceDesign (e.g. 'A calm female voice')
 
   # =================== Voice Activity Detection ===================
   vad_config:

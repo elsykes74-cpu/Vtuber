@@ -481,6 +481,59 @@ class OpenAITTSConfig(I18nMixin):
     }
 
 
+class VllmOmniTTSConfig(I18nMixin):
+    """Configuration for vLLM-Omni TTS (Qwen3-TTS served via vLLM-Omni)."""
+
+    base_url: str = Field("http://0.0.0.0:8091/v1", alias="base_url")
+    model: str = Field("qwen3-tts", alias="model")
+    voice: str = Field("vivian", alias="voice")
+    language: str = Field("Auto", alias="language")
+    task_type: str = Field("Base", alias="task_type")
+    ref_audio: Optional[str] = Field(None, alias="ref_audio")
+    ref_text: Optional[str] = Field(None, alias="ref_text")
+    instructions: Optional[str] = Field(None, alias="instructions")
+    chunk_size_ms: int = Field(200, alias="chunk_size_ms")
+
+    DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
+        "base_url": Description(
+            en="Base URL of the vLLM-Omni server",
+            zh="vLLM-Omni 服务器的基础 URL",
+        ),
+        "voice": Description(
+            en="Speaker name (CustomVoice) or description (VoiceDesign)",
+            zh="说话人名称（CustomVoice）或描述（VoiceDesign）",
+        ),
+        "language": Description(
+            en="Language: Auto, English, Chinese, Spanish, etc.",
+            zh="语言：Auto、English、Chinese、Spanish 等",
+        ),
+        "task_type": Description(
+            en="Task type matching the loaded model: Base, CustomVoice, or VoiceDesign",
+            zh="与加载模型匹配的任务类型：Base、CustomVoice 或 VoiceDesign",
+        ),
+        "ref_audio": Description(
+            en="Reference audio for voice cloning (Base model only), e.g. file:///audio/voice.wav",
+            zh="语音克隆参考音频（仅 Base 模型），如 file:///audio/voice.wav",
+        ),
+        "ref_text": Description(
+            en="Transcript of the reference audio (Base model only)",
+            zh="参考音频的文本转录（仅 Base 模型）",
+        ),
+        "instructions": Description(
+            en="Style/emotion guidance (VoiceDesign only)",
+            zh="风格/情感引导（仅 VoiceDesign）",
+        ),
+        "model": Description(
+            en="Model preset: qwen3-tts (determines sample rate and other constants)",
+            zh="模型预设：qwen3-tts（决定采样率等常量）",
+        ),
+        "chunk_size_ms": Description(
+            en="Size of each yielded PCM chunk in milliseconds (default 200)",
+            zh="每次产生的 PCM 块大小（毫秒，默认 200）",
+        ),
+    }
+
+
 class SparkTTSConfig(I18nMixin):
     """Configuration for Spark TTS."""
 
@@ -702,6 +755,7 @@ class TTSConfig(I18nMixin):
         "elevenlabs_tts",
         "cartesia_tts",
         "piper_tts",
+        "vllm_omni_tts",
     ] = Field(..., alias="tts_model")
 
     azure_tts: Optional[AzureTTSConfig] = Field(None, alias="azure_tts")
@@ -726,6 +780,7 @@ class TTSConfig(I18nMixin):
     elevenlabs_tts: ElevenLabsTTSConfig | None = Field(None, alias="elevenlabs_tts")
     cartesia_tts: CartesiaTTSConfig | None = Field(None, alias="cartesia_tts")
     piper_tts: Optional[PiperTTSConfig] = Field(None, alias="piper_tts")
+    vllm_omni_tts: Optional[VllmOmniTTSConfig] = Field(None, alias="vllm_omni_tts")
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "tts_model": Description(
@@ -769,6 +824,10 @@ class TTSConfig(I18nMixin):
             en="Configuration for Cartesia TTS", zh="Cartesia TTS 配置"
         ),
         "piper_tts": Description(en="Configuration for Piper TTS", zh="Piper TTS 配置"),
+        "vllm_omni_tts": Description(
+            en="Configuration for vLLM-Omni TTS (Qwen3-TTS)",
+            zh="vLLM-Omni TTS（Qwen3-TTS）配置",
+        ),
     }
 
     @model_validator(mode="after")
@@ -813,4 +872,6 @@ class TTSConfig(I18nMixin):
 
         elif tts_model == "piper_tts" and values.piper_tts is not None:
             values.piper_tts.model_validate(values.piper_tts.model_dump())
+        elif tts_model == "vllm_omni_tts" and values.vllm_omni_tts is not None:
+            values.vllm_omni_tts.model_validate(values.vllm_omni_tts.model_dump())
         return values

@@ -274,7 +274,7 @@ character_config:
     #   'azure_tts', 'pyttsx3_tts', 'edge_tts', 'bark_tts',
     #   'cosyvoice_tts', 'melo_tts', 'coqui_tts', 'piper_tts',
     #   'fish_api_tts', 'x_tts', 'gpt_sovits_tts', 'sherpa_onnx_tts'
-    #   'minimax_tts', 'elevenlabs_tts', 'cartesia_tts'
+    #   'minimax_tts', 'elevenlabs_tts', 'cartesia_tts', 'vllm_omni_tts'
 
     siliconflow_tts:
       api_url: "https://api.siliconflow.cn/v1/audio/speech"
@@ -447,6 +447,16 @@ character_config:
       emotion: 'neutral' # 情感指导
       volume: 1.0 # 语音音量（0.5 到 2.0）
       speed: 1.0 # 语音速度（0.6 到 1.5）
+
+    vllm_omni_tts: # 通过 OpenAI 兼容 API 的 vLLM-Omni TTS（需要 vllm-omni 服务器）
+      base_url: 'http://localhost:8091/v1'
+      model: 'qwen3-tts' # 用于采样率检测的模型系列
+      voice: '' # 说话人名称（如 'Chelsie'）
+      language: 'Auto' # 语言：Auto、Chinese、English、Japanese、Korean 等
+      task_type: 'Base' # Base、CustomVoice 或 VoiceDesign
+      ref_audio: '' # CustomVoice 的参考音频路径
+      ref_text: '' # CustomVoice 的参考音频文字
+      instructions: '' # VoiceDesign 的语音描述（如 '温柔的女性声音'）
 
   # =================== Voice Activity Detection ===================
   vad_config:
