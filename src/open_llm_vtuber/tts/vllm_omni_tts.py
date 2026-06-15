@@ -32,6 +32,9 @@ class TTSEngine(TTSInterface):
         chunk_size_ms: int = 200,
         **kwargs,
     ):
+        if chunk_size_ms <= 0:
+            raise ValueError("chunk_size_ms must be > 0")
+
         preset = MODEL_PRESETS.get(model)
         if preset is None:
             raise ValueError(
@@ -40,6 +43,7 @@ class TTSEngine(TTSInterface):
             )
 
         self.base_url = base_url.rstrip("/")
+        self.model = model
         self.voice = voice
         self.language = language
         self.task_type = task_type
@@ -55,6 +59,7 @@ class TTSEngine(TTSInterface):
 
     def _build_payload(self, text: str, stream: bool) -> dict:
         payload = {
+            "model": self.model,
             "input": text,
             "voice": self.voice,
             "response_format": "pcm" if stream else "wav",

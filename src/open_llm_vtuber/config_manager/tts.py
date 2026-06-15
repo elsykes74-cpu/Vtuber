@@ -484,7 +484,7 @@ class OpenAITTSConfig(I18nMixin):
 class VllmOmniTTSConfig(I18nMixin):
     """Configuration for vLLM-Omni TTS (Qwen3-TTS served via vLLM-Omni)."""
 
-    base_url: str = Field("http://0.0.0.0:8091/v1", alias="base_url")
+    base_url: str = Field("http://localhost:8091/v1", alias="base_url")
     model: str = Field("qwen3-tts", alias="model")
     voice: str = Field("vivian", alias="voice")
     language: str = Field("Auto", alias="language")

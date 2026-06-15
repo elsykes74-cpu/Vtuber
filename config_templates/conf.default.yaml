@@ -459,8 +459,8 @@ character_config:
       voice: '' # Speaker name (e.g. 'Chelsie')
       language: 'Auto' # Language: Auto, Chinese, English, Japanese, Korean, etc.
       task_type: 'Base' # Base, CustomVoice, or VoiceDesign
-      ref_audio: '' # Path to reference audio for CustomVoice
-      ref_text: '' # Transcript of reference audio for CustomVoice
+      ref_audio: '' # Path to reference audio for Base (voice cloning)
+      ref_text: '' # Transcript of reference audio for Base (voice cloning)
       instructions: '' # Voice description for VoiceDesign (e.g. 'A calm female voice')
 
   # =================== Voice Activity Detection ===================

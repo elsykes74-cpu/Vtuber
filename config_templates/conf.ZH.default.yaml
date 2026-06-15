@@ -454,8 +454,8 @@ character_config:
       voice: '' # 说话人名称（如 'Chelsie'）
       language: 'Auto' # 语言：Auto、Chinese、English、Japanese、Korean 等
       task_type: 'Base' # Base、CustomVoice 或 VoiceDesign
-      ref_audio: '' # CustomVoice 的参考音频路径
-      ref_text: '' # CustomVoice 的参考音频文字
+      ref_audio: '' # Base（语音克隆）的参考音频路径
+      ref_text: '' # Base（语音克隆）的参考音频文字
       instructions: '' # VoiceDesign 的语音描述（如 '温柔的女性声音'）
 
   # =================== Voice Activity Detection ===================
