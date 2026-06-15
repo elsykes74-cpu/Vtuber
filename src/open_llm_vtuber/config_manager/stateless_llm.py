@@ -96,6 +96,9 @@ class OllamaConfig(OpenAICompatibleConfig):
     llm_api_key: str = Field("default_api_key", alias="llm_api_key")
     keep_alive: float = Field(-1, alias="keep_alive")
     unload_at_exit: bool = Field(True, alias="unload_at_exit")
+    think: bool = Field(True, alias="think")
+    num_gpu: int = Field(-1, alias="num_gpu")
+    num_ctx: int = Field(4096, alias="num_ctx")
     interrupt_method: Literal["system", "user"] = Field(
         "system", alias="interrupt_method"
     )
@@ -114,6 +117,21 @@ class OllamaConfig(OpenAICompatibleConfig):
         "unload_at_exit": Description(
             en="Unload the model when the program exits.",
             zh="是否在程序退出时卸载模型。",
+        ),
+        "think": Description(
+            en="Enable extended thinking for reasoning models. "
+            "Set to false to disable <think> reasoning and reduce latency.",
+            zh="启用推理模型的扩展思考。设置为 false 以禁用 <think> 推理并减少延迟。",
+        ),
+        "num_gpu": Description(
+            en="Number of model layers to place on GPU. "
+            "Set to -1 for auto-detection, 0 for CPU-only, 99 to force all layers on GPU.",
+            zh="放置在 GPU 上的模型层数。设置为 -1 自动检测，0 仅 CPU，99 强制所有层到 GPU。",
+        ),
+        "num_ctx": Description(
+            en="Context window size in tokens. "
+            "Lower values reduce VRAM usage. Default is 4096.",
+            zh="上下文窗口大小（token 数）。较低的值减少 VRAM 使用。默认值为 4096。",
         ),
     }
 

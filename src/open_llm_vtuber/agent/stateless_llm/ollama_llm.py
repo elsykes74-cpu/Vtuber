@@ -15,10 +15,21 @@ class OllamaLLM(AsyncLLM):
         temperature: float = 1.0,
         keep_alive: float = -1,
         unload_at_exit: bool = True,
+        think: bool = True,
+        num_gpu: int = -1,
+        num_ctx: int = 4096,
+        extra_body: dict | None = None,
     ):
         self.keep_alive = keep_alive
         self.unload_at_exit = unload_at_exit
         self.cleaned = False
+        ollama_extra = extra_body or {}
+        if not think:
+            ollama_extra["think"] = False
+        logger.info(
+            f"OllamaLLM think={think}, num_gpu={num_gpu}, "
+            f"num_ctx={num_ctx}, extra_body={ollama_extra or None}"
+        )
         super().__init__(
             model=model,
             base_url=base_url,
@@ -26,17 +37,20 @@ class OllamaLLM(AsyncLLM):
             organization_id=organization_id,
             project_id=project_id,
             temperature=temperature,
+            extra_body=ollama_extra or None,
         )
+        preload_options = {"num_ctx": num_ctx}
+        if num_gpu >= 0:
+            preload_options["num_gpu"] = num_gpu
         try:
-            # preload model
             logger.info("Preloading model for Ollama")
-            # Send the POST request to preload model
             logger.debug(
                 requests.post(
                     base_url.replace("/v1", "") + "/api/chat",
                     json={
                         "model": model,
                         "keep_alive": keep_alive,
+                        "options": preload_options,
                     },
                 )
             )

@@ -1,6 +1,7 @@
 from typing import Union, List, Dict, Any, Optional
 import asyncio
 import json
+import time
 from loguru import logger
 import numpy as np
 
@@ -48,6 +49,7 @@ async def process_single_conversation(
     # Create TTSTaskManager for this conversation
     tts_manager = TTSTaskManager()
     full_response = ""  # Initialize full_response here
+    t_pipeline_start = time.monotonic()
 
     try:
         # Send initial signals
@@ -57,6 +59,9 @@ async def process_single_conversation(
         # Process user input
         input_text = await process_user_input(
             user_input, context.asr_engine, websocket_send
+        )
+        logger.info(
+            f"[TIMING] Input processing: {time.monotonic() - t_pipeline_start:.2f}s"
         )
 
         # Create batch input
@@ -87,6 +92,8 @@ async def process_single_conversation(
 
         try:
             # agent.chat yields Union[SentenceOutput, Dict[str, Any]]
+            t_llm_start = time.monotonic()
+            t_first_output = None
             agent_output_stream = context.agent_engine.chat(batch_input)
 
             async for output_item in agent_output_stream:
@@ -101,6 +108,13 @@ async def process_single_conversation(
                     await websocket_send(json.dumps(output_item))
 
                 elif isinstance(output_item, (SentenceOutput, AudioOutput)):
+                    if t_first_output is None:
+                        t_first_output = time.monotonic()
+                        logger.info(
+                            f"[TIMING] LLM first sentence: "
+                            f"{t_first_output - t_llm_start:.2f}s "
+                            f"(total from input: {t_first_output - t_pipeline_start:.2f}s)"
+                        )
                     # Handle SentenceOutput or AudioOutput
                     response_part = await process_agent_output(
                         output=output_item,
