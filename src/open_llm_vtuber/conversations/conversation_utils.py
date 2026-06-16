@@ -70,7 +70,9 @@ async def process_agent_output(
         else:
             logger.warning(f"Unknown output type: {type(output)}")
     except Exception as e:
-        logger.error(f"Error processing agent output: {e}")
+        logger.opt(exception=True).error(
+            f"Error processing agent output ({type(e).__name__}: {e})"
+        )
         await websocket_send(
             json.dumps(
                 {"type": "error", "message": f"Error processing response: {str(e)}"}
