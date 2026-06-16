@@ -171,6 +171,31 @@ class TTSTaskManager:
             file_name_no_ext=f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{str(uuid.uuid4())[:8]}",
         )
 
+    async def wait_for_tasks(self) -> None:
+        """
+        Wait for all queued TTS tasks, containing failures instead of
+        propagating them.
+
+        A single failed sentence must not abort the whole turn: letting
+        the exception escape skips `backend-synth-complete` and history
+        storage, so the next turn behaves as if the conversation was
+        interrupted. Failures are logged with their exception type
+        because some exceptions raise with an empty message and would
+        otherwise be undiagnosable. Cancellation is control flow, not a
+        TTS failure, and is re-raised.
+        """
+        if not self.task_list:
+            return
+        results = await asyncio.gather(*self.task_list, return_exceptions=True)
+        for result in results:
+            if isinstance(result, asyncio.CancelledError):
+                raise result
+            if isinstance(result, BaseException):
+                logger.opt(exception=result).error(
+                    f"TTS task failed ({type(result).__name__}: {result}); "
+                    "continuing with the remaining sentences"
+                )
+
     def clear(self) -> None:
         """Clear all pending tasks and reset state"""
         self.task_list.clear()

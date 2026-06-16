@@ -1,4 +1,3 @@
-import asyncio
 import re
 from typing import Optional, Union, Any, List, Dict
 import numpy as np
@@ -71,7 +70,9 @@ async def process_agent_output(
         else:
             logger.warning(f"Unknown output type: {type(output)}")
     except Exception as e:
-        logger.error(f"Error processing agent output: {e}")
+        logger.opt(exception=True).error(
+            f"Error processing agent output ({type(e).__name__}: {e})"
+        )
         await websocket_send(
             json.dumps(
                 {"type": "error", "message": f"Error processing response: {str(e)}"}
@@ -167,7 +168,7 @@ async def finalize_conversation_turn(
 ) -> None:
     """Finalize a conversation turn"""
     if tts_manager.task_list:
-        await asyncio.gather(*tts_manager.task_list)
+        await tts_manager.wait_for_tasks()
         await websocket_send(json.dumps({"type": "backend-synth-complete"}))
 
         response = await message_handler.wait_for_response(

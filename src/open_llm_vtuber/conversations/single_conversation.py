@@ -137,9 +137,10 @@ async def process_single_conversation(
             # full_response will contain partial response before error
         # --- End processing agent response ---
 
-        # Wait for any pending TTS tasks
+        # Wait for any pending TTS tasks. Failed sentences are logged and
+        # skipped (#384) so the turn still finalizes and gets stored.
         if tts_manager.task_list:
-            await asyncio.gather(*tts_manager.task_list)
+            await tts_manager.wait_for_tasks()
             await websocket_send(json.dumps({"type": "backend-synth-complete"}))
 
         await finalize_conversation_turn(
@@ -165,7 +166,11 @@ async def process_single_conversation(
         logger.info(f"🤡👍 Conversation {session_emoji} cancelled because interrupted.")
         raise
     except Exception as e:
-        logger.error(f"Error in conversation chain: {e}")
+        # Log type and traceback: some exceptions stringify to "" and the
+        # bare message made this branch undiagnosable (#384).
+        logger.opt(exception=True).error(
+            f"Error in conversation chain ({type(e).__name__}: {e})"
+        )
         await websocket_send(
             json.dumps({"type": "error", "message": f"Conversation error: {str(e)}"})
         )
