@@ -65,7 +65,11 @@ class LettaAgent(AgentInterface):
         payload = {"messages": messages, "stream_tokens": True}
         path = f"/v1/agents/{self.id}/messages/stream"
 
-        async with httpx.AsyncClient(base_url=self.url, timeout=None) as client:
+        # read=None — SSE streams hold the connection open between events.
+        # Other phases get finite ceilings so the agent fails fast if Letta
+        # is unreachable instead of hanging forever.
+        timeout = httpx.Timeout(connect=10.0, read=None, write=10.0, pool=10.0)
+        async with httpx.AsyncClient(base_url=self.url, timeout=timeout) as client:
             async with client.stream("POST", path, json=payload) as response:
                 response.raise_for_status()
                 async for line in response.aiter_lines():
