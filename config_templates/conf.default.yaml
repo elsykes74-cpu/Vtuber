@@ -57,7 +57,7 @@ character_config:
         # examples: 
         # 'openai_compatible_llm', 'llama_cpp_llm', 'claude_llm', 'ollama_llm'
         # 'openai_llm', 'gemini_llm', 'zhipu_llm', 'deepseek_llm', 'groq_llm'
-        # 'mistral_llm', 'lmstudio_llm', and more
+        # 'mistral_llm', 'atlas_cloud_llm', 'lmstudio_llm', and more
         llm_provider: 'ollama_llm'
         # let ai speak as soon as the first comma is received on the first sentence
         # to reduced latency.
@@ -168,6 +168,14 @@ character_config:
       groq_llm:
         llm_api_key: 'your groq API key'
         model: 'llama-3.3-70b-versatile'
+        temperature: 1.0 # value between 0 to 2
+
+      # Atlas Cloud (OpenAI-compatible, https://www.atlascloud.ai)
+      # Unified access to 300+ open and frontier models. Get an API key at https://www.atlascloud.ai
+      atlas_cloud_llm:
+        base_url: 'https://api.atlascloud.ai/v1'
+        llm_api_key: 'Your Atlas Cloud API key'
+        model: 'deepseek-ai/DeepSeek-V3'
         temperature: 1.0 # value between 0 to 2
 
   # === Automatic Speech Recognition ===

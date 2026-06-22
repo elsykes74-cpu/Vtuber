@@ -58,7 +58,7 @@ character_config:
         # 例如：
         # 'openai_compatible_llm', 'llama_cpp_llm', 'claude_llm', 'ollama_llm'
         # 'openai_llm', 'gemini_llm', 'zhipu_llm', 'deepseek_llm', 'groq_llm'
-        # 'mistral_llm', 'lmstudio_llm' 之类的
+        # 'mistral_llm', 'atlas_cloud_llm', 'lmstudio_llm' 之类的
         llm_provider: 'ollama_llm' # 使用的 LLM 提供商
         # 是否在第一句回应时遇上逗号就直接生成音频以减少首句延迟（默认：True）
         faster_first_response: True
@@ -167,6 +167,14 @@ character_config:
       groq_llm:
         llm_api_key: 'your groq API key' # Groq API 密钥
         model: 'llama-3.3-70b-versatile' # 使用的模型
+        temperature: 1.0 # 温度，介于 0 到 2 之间
+
+      # Atlas Cloud（OpenAI 兼容，https://www.atlascloud.ai）
+      # 通过统一接口访问 300+ 开源与前沿模型。在 https://www.atlascloud.ai 获取 API 密钥
+      atlas_cloud_llm:
+        base_url: 'https://api.atlascloud.ai/v1' # API 端点
+        llm_api_key: 'Your Atlas Cloud API key' # Atlas Cloud API 密钥
+        model: 'deepseek-ai/DeepSeek-V3' # 使用的模型
         temperature: 1.0 # 温度，介于 0 到 2 之间
 
   # === 自动语音识别 ===
