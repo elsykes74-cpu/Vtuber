@@ -2,6 +2,12 @@
 
 `version: 2025.08.05-1`
 
+> This is the single cross-tool guidance file (the `AGENTS.md` standard, read by
+> Cursor, GitHub Copilot, Gemini, and others). It replaces the former identical
+> copies at `.github/copilot-instructions.md`, `.gemini/GEMINI.md`, and
+> `.cursor/rules/olv-core-rules.mdc` — edit this file only. Claude Code reads
+> `CLAUDE.md`, which carries repo-specific workflow rules on top of this.
+
 ## 1. Core Project Context
 
   - **Project:** Open-LLM-VTuber, a low-latency voice-based LLM interaction tool.
