@@ -1,0 +1,21 @@
+name: Config Smoke Test
+on: [ push, pull_request ]
+jobs:
+  lock-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Check pyproject.toml and uv.lock are resolvable and in sync
+        run: uv lock --check
+  config-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install config_manager dependencies only
+        run: pip install pydantic pyyaml loguru chardet
+      - name: Validate config templates and character configs
+        run: python tests/smoke_test.py

@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Open-LLM-VTuber is a voice-interactive AI companion with Live2D avatar support that runs completely offline. It's a cross-platform Python application supporting real-time voice conversations, visual perception, and Live2D character animations. The project features modular architecture for LLM, ASR (Automatic Speech Recognition), TTS (Text-to-Speech), and other components.
 
+This repository is a fork of Open-LLM-VTuber. Branches such as `v2`, `v0.3.0`, `v1-release`, and `stream_tts` are inherited upstream history — do not base work on them. All work branches from and merges to `main`; before starting, confirm your branch's merge-base is current with `origin/main` (`git fetch origin main && git merge-base HEAD origin/main`).
+
 ## Essential Commands
 
 ### Development Setup
@@ -18,6 +20,15 @@ Open-LLM-VTuber is a voice-interactive AI companion with Live2D avatar support t
 - **Lint code**: `ruff check .`
 - **Format code**: `ruff format .`
 - **Run pre-commit hooks**: `pre-commit run --all-files`
+- **Config smoke test**: `uv run python tests/smoke_test.py` (offline; validates config templates, character configs, and EN/ZH template sync)
+- **Dependency check**: `uv lock --check` (run whenever `pyproject.toml` changes)
+
+### Fresh Checkout Gotchas
+- **`frontend/` is an empty git submodule** in fresh clones. Run `git submodule update --init frontend` or the web UI returns 404 (backend endpoints still work).
+- **`conf.yaml` does not exist and is gitignored.** The server auto-creates it from `config_templates/conf.default.yaml` on first boot — don't hand-create it unless you need overrides.
+- **`chat_history/` and `cache/` are created at runtime**; their absence is normal.
+- **First boot needs network**: `server.initialize()` downloads ASR/TTS models, and the default LLM config expects Ollama at `localhost:11434` (the server boots without it, but conversations fail).
+- When you cannot boot the server (offline container), verify changes with `uv run python tests/smoke_test.py` and say explicitly that the change was not verified against a running server.
 
 ### Server Configuration
 - **Main config file**: `conf.yaml` (user configuration)
@@ -89,7 +100,7 @@ The project uses a factory pattern for all AI engines:
 ## Key Development Patterns
 
 ### Error Handling
-The codebase uses the missing `_cleanup_failed_connection` method pattern - when implementing new WebSocket handlers, ensure proper cleanup methods are implemented.
+When a WebSocket connection fails during setup, it is cleaned up via `_cleanup_failed_connection` in `websocket_handler.py`. New connection-handling code must implement equivalent cleanup so failed connections don't leak service contexts.
 
 ### Live2D Integration
 - Models stored in `live2d-models/` directory
@@ -111,12 +122,12 @@ The codebase uses the missing `_cleanup_failed_connection` method pattern - when
 - **Entry point**: `run_server.py`
 - **Main server**: `src/open_llm_vtuber/server.py`
 - **WebSocket routing**: `src/open_llm_vtuber/routes.py`
-- **Configuration**: `conf.yaml` (user), `config_templates/` (defaults)
-- **Frontend**: `frontend/` (Git submodule)
+- **Configuration**: `conf.yaml` (user; gitignored, auto-created on first boot), `config_templates/` (defaults)
+- **Frontend**: `frontend/` (Git submodule — empty until `git submodule update --init frontend`)
 - **Live2D models**: `live2d-models/`
 - **Character definitions**: `characters/`
-- **Chat history**: `chat_history/`
-- **Cache**: `cache/` (audio files, temporary data)
+- **Chat history**: `chat_history/` (created at runtime)
+- **Cache**: `cache/` (audio files, temporary data; created at runtime)
 
 ## Development Guidelines
 
@@ -141,11 +152,14 @@ The codebase uses the missing `_cleanup_failed_connection` method pattern - when
 
 ## Testing and Quality Assurance
 
-The project uses:
-- **Ruff** for linting and formatting (configured in `pyproject.toml`)
+**There is no unit test suite.** Verification for this project means:
+- **Ruff** for linting and formatting (configured in `pyproject.toml`; CI runs it on every push/PR)
+- **Config smoke test**: `uv run python tests/smoke_test.py` — validates all config templates and character configs through the server's own load path, and checks EN/ZH template sync (CI runs it via `.github/workflows/smoke.yml`)
+- **`uv lock --check`** on any dependency change (CI runs it; an out-of-sync or unresolvable lockfile breaks `uv sync` for every user)
 - **Pre-commit hooks** for automated quality checks
-- **GitHub Actions** for CI/CD (`.github/workflows/`)
-- Manual testing through web interface and desktop client
+- Manual testing through the web interface and desktop client
+
+Never merge a PR while its checks are still running, and never claim a change works if it was only linted.
 
 ## Package Management
 
