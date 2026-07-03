@@ -28,10 +28,6 @@ loguru==0.7.3
     # via open-llm-vtuber (pyproject.toml)
 mcp==1.26.0
     # via open-llm-vtuber (pyproject.toml)
-memu-py==0.2.2 ; python_full_version < '3.13'
-    # via open-llm-vtuber (pyproject.toml)
-memu-py==1.5.1 ; python_full_version >= '3.13'
-    # via open-llm-vtuber (pyproject.toml)
 numpy==1.26.4
     # via open-llm-vtuber (pyproject.toml)
 onnxruntime==1.23.2
