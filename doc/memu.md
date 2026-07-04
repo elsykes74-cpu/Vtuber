@@ -4,17 +4,28 @@
 
 ### 适用版本
 - Open-LLM-VTuber ≥ 1.2.0
-- Python ≥ 3.10
-- memu-py ≥ 0.1.8（已写入项目依赖）
+- **memu-py 本身需要 Python ≥ 3.13**，而本项目当前支持的 Python 范围是 3.10-3.12
+  （见 `pyproject.toml` 的 `requires-python`）。这意味着 MemU 长期记忆功能目前只能
+  在 Python 3.13+ 环境中启用；在 3.10-3.12 下，`memu_config.enable: true` 会被安全地
+  忽略并打印一条说明日志（不影响其他功能，语音对话等核心能力照常离线运行）。
 
 ---
 
 ## 快速开始
 
-1) 同步依赖
+1) 安装 memu-py（可选依赖，不在核心依赖中）
+
+`memu-py` **没有**被列入项目核心依赖（`pyproject.toml` 的 `dependencies`），
+因为它会导致所有 Python 3.10-3.12 用户的 `uv sync` 失败。它作为一个带版本条件的
+可选 extra 存在：
 
 ```bash
-uv sync
+# 仅当你的解释器是 Python 3.13+ 时才会真正安装 memu-py；
+# 在 3.10-3.12 下这条命令会成功但不会安装 memu-py（属预期行为）。
+uv sync --extra memu
+
+# 或者在一个独立的 Python 3.13+ 环境里手动安装：
+pip install "memu-py>=0.1.8"
 ```
 
 2) 填写配置（其一即可）
@@ -152,8 +163,13 @@ client.delete_memories(user_id="user123", agent_id="agent456")
 
 ### 1. 已配置但无效？
 - 确认 `memu_config.enable: true`。
-- 确认 `api_key` 有效（或通过 `MEMU_API_KEY` 注入）。
-- 启动日志若出现 “MemU is enabled but 'memu-py' is not installed” 请执行 `uv sync`（或 `uv add memu-py`）。
+- 确认 `api_key` 有效（配置文件里的 `memu_config.api_key`，或环境变量 `MEMU_API_KEY`——
+  留空配置项时会自动读取环境变量，二者任一有值即可）。
+- 启动日志若出现 "MemU is enabled, but 'memu-py' requires Python >=3.13"，说明当前
+  解释器是 3.10-3.12，这是本项目支持范围与 memu-py 自身要求之间的已知差距，需要切换到
+  Python 3.13+ 环境才能使用 MemU（其余功能不受影响）。
+- 启动日志若出现 "MemU is enabled but 'memu-py' is not installed"（且解释器已是 3.13+），
+  请执行 `uv sync --extra memu`（或手动 `pip install "memu-py>=0.1.8"`）。
 
 ### 2. 远端错误码
 - 401/403：鉴权失败或权限不足 → 核对 API Key / 项目权限。

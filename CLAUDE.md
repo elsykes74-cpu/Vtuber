@@ -167,4 +167,4 @@ Uses **uv** (modern Python package manager):
 - Dependencies defined in `pyproject.toml`
 - Lock file: `uv.lock`
 - Generated requirements: `requirements.txt` (auto-generated)
-- Optional dependencies for specific features (e.g., `bilibili` extra)
+- Optional dependencies for specific features (e.g., `bilibili` extra; `memu` extra for long-term memory via MemU — only actually installs on Python >=3.13, a no-op on the project's default 3.10-3.12 range, see doc/memu.md)
