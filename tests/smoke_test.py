@@ -22,6 +22,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from open_llm_vtuber.config_manager.utils import read_yaml, validate_config  # noqa: E402
+from open_llm_vtuber.config_manager import MemUConfig, BasicMemoryAgentConfig  # noqa: E402
 
 TEMPLATES_DIR = REPO_ROOT / "config_templates"
 CHARACTERS_DIR = REPO_ROOT / "characters"
@@ -89,6 +90,44 @@ def check_template_sync() -> None:
         )
 
 
+def check_memu_config_schema() -> None:
+    """MemU's config schema doesn't appear in any shipped character/template
+    file (it's an opt-in, commented-out example in conf.default.yaml), so
+    the template-validation checks above never exercise it. Validate it
+    directly against the documented example (see doc/memu.md and the
+    commented block in config_templates/conf.default.yaml) so schema drift
+    between the two is caught here instead of at first real use."""
+    memu = MemUConfig(
+        enable=True,
+        base_url="https://api.memu.so",
+        api_key="test_key",
+        top_k=3,
+        min_similarity=0.7,
+    )
+    assert memu.enable is True
+    assert memu.top_k == 3
+
+    # BasicMemoryAgentConfig must accept a nested memu_config the same way
+    # the real conf.yaml -> pydantic loading path does.
+    agent_cfg = BasicMemoryAgentConfig(
+        llm_provider="openai_compatible_llm",
+        memu_config={
+            "enable": True,
+            "base_url": "https://api.memu.so",
+            "api_key": "test_key",
+            "top_k": 3,
+            "min_similarity": 0.7,
+        },
+    )
+    assert agent_cfg.memu_config is not None
+    assert agent_cfg.memu_config.api_key == "test_key"
+
+    # memu_config is optional - omitting it entirely must still validate,
+    # since it's disabled by default for everyone who doesn't opt in.
+    agent_cfg_no_memu = BasicMemoryAgentConfig(llm_provider="openai_compatible_llm")
+    assert agent_cfg_no_memu.memu_config is None
+
+
 def main() -> int:
     print("== config templates ==")
     for template in sorted(TEMPLATES_DIR.glob("*.yaml")):
@@ -109,6 +148,12 @@ def main() -> int:
     check(
         "conf.default.yaml and conf.ZH.default.yaml have identical key structure",
         check_template_sync,
+    )
+
+    print("== MemU config schema ==")
+    check(
+        "MemUConfig / BasicMemoryAgentConfig accept the documented memu_config shape",
+        check_memu_config_schema,
     )
 
     if failures:

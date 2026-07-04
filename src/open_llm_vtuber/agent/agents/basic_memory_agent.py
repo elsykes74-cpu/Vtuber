@@ -9,6 +9,8 @@ from typing import (
     Optional,
 )
 import asyncio
+import os
+import sys
 from loguru import logger
 from .agent_interface import AgentInterface
 from ..output_types import SentenceOutput, DisplayText
@@ -29,6 +31,7 @@ from ...mcpp.tool_manager import ToolManager
 from ...mcpp.json_detector import StreamJSONDetector
 from ...mcpp.types import ToolCallObject
 from ...mcpp.tool_executor import ToolExecutor
+
 try:
     # The MemU Python SDK. Kept optional; agent works without it.
     from memu import MemuClient  # type: ignore
@@ -131,19 +134,37 @@ class BasicMemoryAgent(AgentInterface):
 
         # Initialize MemU client if configured
         if self._memu_config and self._memu_config.enable:
+            # api_key/base_url can come from conf.yaml or these env vars (env
+            # vars win if the config field is left blank, so keys don't have
+            # to be committed to conf.yaml). See doc/memu.md.
+            memu_api_key = self._memu_config.api_key or os.getenv("MEMU_API_KEY", "")
+            memu_base_url = os.getenv("MEMU_API_BASE_URL", self._memu_config.base_url)
+
             if not MemuClient:
+                if sys.version_info < (3, 13):
+                    logger.warning(
+                        "MemU is enabled, but 'memu-py' requires Python >=3.13 "
+                        f"(this interpreter is {sys.version_info.major}.{sys.version_info.minor}). "
+                        "This project supports Python 3.10-3.12, so MemU can't run in this "
+                        "environment yet — see doc/memu.md. Long-term memory is disabled; "
+                        "everything else works normally."
+                    )
+                else:
+                    logger.warning(
+                        "MemU is enabled but 'memu-py' is not installed. Run "
+                        "'uv sync --extra memu' (or 'pip install memu-py>=0.1.8') to enable it."
+                    )
+            elif not memu_api_key:
                 logger.warning(
-                    "MemU is enabled but 'memu-py' is not installed. Please run 'uv add memu-py' to enable it."
-                )
-            elif not self._memu_config.api_key:
-                logger.warning(
-                    "MemU is enabled, but API key is missing. Disabling MemU for this session."
+                    "MemU is enabled, but no API key was found in conf.yaml "
+                    "(memu_config.api_key) or the MEMU_API_KEY environment variable. "
+                    "Disabling MemU for this session."
                 )
             else:
                 try:
                     self._memu_client = MemuClient(
-                        base_url=self._memu_config.base_url,
-                        api_key=self._memu_config.api_key,
+                        base_url=memu_base_url,
+                        api_key=memu_api_key,
                     )
                     logger.info("MemU long-term memory enabled for this agent ✨")
                 except Exception as e:
@@ -691,6 +712,7 @@ class BasicMemoryAgent(AgentInterface):
                 turn_system_prompt = self._system
                 if self._memu_client and input_text:
                     try:
+
                         async def _retrieve_context() -> str:
                             def _sync_call() -> str:
                                 try:
@@ -706,8 +728,12 @@ class BasicMemoryAgent(AgentInterface):
                                         user_id=self._memu_user_id,
                                         agent_id=self._memu_agent_id,
                                         query=input_text,
-                                        top_k=self._memu_config.top_k if self._memu_config else 3,
-                                        min_similarity=self._memu_config.min_similarity if self._memu_config else 0.7,
+                                        top_k=self._memu_config.top_k
+                                        if self._memu_config
+                                        else 3,
+                                        min_similarity=self._memu_config.min_similarity
+                                        if self._memu_config
+                                        else 0.7,
                                     )
                                     related = getattr(resp, "related_memories", [])
                                     if not related:
@@ -717,7 +743,9 @@ class BasicMemoryAgent(AgentInterface):
                                         try:
                                             content = item.memory.content  # type: ignore[attr-defined]
                                         except Exception:
-                                            content = getattr(item, "content", None) or str(item)
+                                            content = getattr(
+                                                item, "content", None
+                                            ) or str(item)
                                         if content:
                                             lines.append(f"- {content}")
                                     if not lines:
@@ -726,7 +754,9 @@ class BasicMemoryAgent(AgentInterface):
                                         "[Relevant long-term memories for you to consider:]\n"
                                         + "\n".join(lines)
                                     )
-                                except Exception as inner_e:  # pragma: no cover - defensive
+                                except (
+                                    Exception
+                                ) as inner_e:  # pragma: no cover - defensive
                                     logger.error(f"MemU retrieval error: {inner_e}")
                                     return ""
 
@@ -734,9 +764,15 @@ class BasicMemoryAgent(AgentInterface):
 
                         long_term_memory_context = await _retrieve_context()
                         if long_term_memory_context:
-                            logger.info("Injected long-term memories into this turn's context.")
-                            logger.debug(f"MemU context injected:\n{long_term_memory_context}")
-                            turn_system_prompt = f"{long_term_memory_context}\n\n{self._system}"
+                            logger.info(
+                                "Injected long-term memories into this turn's context."
+                            )
+                            logger.debug(
+                                f"MemU context injected:\n{long_term_memory_context}"
+                            )
+                            turn_system_prompt = (
+                                f"{long_term_memory_context}\n\n{self._system}"
+                            )
                     except Exception as e:
                         logger.error(f"Failed to retrieve memories from MemU: {e}")
 
@@ -759,6 +795,7 @@ class BasicMemoryAgent(AgentInterface):
                     # Schedule memorization of this turn to MemU (fire-and-forget)
                     if self._memu_client and input_text:
                         try:
+
                             def _sync_memorize() -> None:
                                 try:
                                     client: Any = self._memu_client
@@ -772,7 +809,10 @@ class BasicMemoryAgent(AgentInterface):
                                     memorize(
                                         conversation=[
                                             {"role": "user", "content": input_text},
-                                            {"role": "assistant", "content": complete_response},
+                                            {
+                                                "role": "assistant",
+                                                "content": complete_response,
+                                            },
                                         ],
                                         user_id=self._memu_user_id,
                                         user_name=self._memu_user_name,
@@ -780,17 +820,25 @@ class BasicMemoryAgent(AgentInterface):
                                         agent_name=self._memu_agent_name,
                                     )
                                 except Exception as err:
-                                    logger.error(f"MemU memorize_conversation failed: {err}")
+                                    logger.error(
+                                        f"MemU memorize_conversation failed: {err}"
+                                    )
 
                             skip_memory = False
-                            if input_data.metadata and input_data.metadata.get("skip_memory", False):
+                            if input_data.metadata and input_data.metadata.get(
+                                "skip_memory", False
+                            ):
                                 skip_memory = True
 
                             if not skip_memory:
                                 asyncio.create_task(asyncio.to_thread(_sync_memorize))
-                                logger.info("Scheduled conversation for memorization with MemU.")
+                                logger.info(
+                                    "Scheduled conversation for memorization with MemU."
+                                )
                         except Exception as e:
-                            logger.error(f"Failed to schedule memorization to MemU: {e}")
+                            logger.error(
+                                f"Failed to schedule memorization to MemU: {e}"
+                            )
 
         return chat_with_memory
 

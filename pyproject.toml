@@ -48,6 +48,15 @@ bilibili = [
     "Brotli~=1.1.0",
     "yarl>=1.12.0,<2.0"
 ]
+# MemU long-term memory (optional). memu-py requires Python >=3.13, which is
+# newer than this project's own supported floor (>=3.10,<3.13, see
+# requires-python above). The python_version marker means `uv sync --extra
+# memu` / `pip install -e ".[memu]"` only actually installs memu-py when the
+# active interpreter is 3.13+; on 3.10-3.12 it resolves to a no-op instead of
+# a hard failure, so the extra is always safe to request. See doc/memu.md.
+memu = [
+    "memu-py>=0.1.8; python_version>=\"3.13\"",
+]
 
 [tool.pixi.project]
 channels = ["conda-forge"]
